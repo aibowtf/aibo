@@ -629,7 +629,6 @@
                         <input type="hidden" name="_subject" value="New Whitelist Submission - hAIpe">
                         <input type="hidden" name="_autoresponse" value="Thank you for submitting your wallet address to the AIbo whitelist!">
                         <input type="hidden" name="_template" value="table">
-                        <input type="hidden" name="_next" value="https://yourusername.github.io/aibo/thank-you.html">
                         <input type="hidden" name="_captcha" value="false">
                         
                         <div class="form-group">
@@ -638,8 +637,10 @@
                         </div>
                         <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
                         <div class="progress-info">
-                            <p id="submissionCount">0/1000 addresses submitted</p>
+                            <p id="submissionCount">0/200 addresses submitted</p>
                         </div>
+    			<div id="formMessage" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;">
+			</div>
                     </form>
                 </div>
             </section>
@@ -774,7 +775,7 @@
 
         // Whitelist functionality for FormSubmit
         let submittedAddresses = 0;
-        const maxAddresses = 1000;
+        const maxAddresses = 200;
 
         document.getElementById('whitelistForm').addEventListener('submit', function(e) {
             const addressInput = document.getElementById('walletAddress');
