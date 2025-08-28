@@ -234,6 +234,30 @@
             color: var(--text-muted);
             line-height: 1.8;
         }
+
+		.hyperliquid-section {
+    		display: flex;
+    		align-items: center;
+    		justify-content: center;
+    		gap: 0.5rem;
+    		margin-bottom: 2.5rem;
+		}
+
+		.launching-text {
+    		font-size: 1.2rem;
+    		color: var(--text-light);
+    		font-weight: 300;
+    		margin: 0;
+		}
+
+		.hyperliquid-logo {
+    		background: linear-gradient(45deg, #00ffd0, #0099ff);
+    		color: white;
+    		padding: 0.4rem 0.8rem;
+    		border-radius: 6px;
+    		font-weight: 600;
+    		font-size: 1.1rem;
+		}
         
         /* Whitelist Page */
         .whitelist-form {
@@ -599,6 +623,9 @@
             <section id="home" class="page active">
                 <section class="hero">
                     <h1>Welcome to AIbo</h1>
+					  <div class="hyperliquid-section">
+        				<p class="launching-text">Launching on</p>
+        			  <div class="hyperliquid-logo">
                     <button class="wallet-btn" id="joinWhitelistBtn">JOIN WHITELIST</button>
                 </section>
                 
