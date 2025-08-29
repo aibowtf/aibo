@@ -982,8 +982,15 @@ const overlay = document.createElement('div');
 overlay.className = 'nav-overlay';
 document.body.appendChild(overlay);
 
-// Close menu function (call this when navigating)
+// Check if we're on mobile
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+// Close menu function (only affects mobile)
 function closeMenu() {
+    if (!isMobile()) return; // Only close menu on mobile
+    
     hamburger.classList.remove('active');
     navLinks.classList.remove('active');
     overlay.classList.remove('active');
@@ -998,6 +1005,8 @@ function closeMenu() {
 
 // Toggle menu function
 function toggleMenu() {
+    if (!isMobile()) return; // Only toggle menu on mobile
+    
     const isOpening = !navLinks.classList.contains('active');
     
     hamburger.classList.toggle('active');
@@ -1023,16 +1032,13 @@ overlay.addEventListener('click', closeMenu);
 // Close menu when clicking on nav links
 document.querySelectorAll('.nav-links a').forEach(link => {
     link.addEventListener('click', () => {
-        closeMenu();
+        if (isMobile()) {
+            closeMenu();
+        }
     });
 });
 
-// Add animation to hamburger icon
-hamburger.addEventListener('click', function() {
-    this.classList.toggle('active');
-});
-
-// Update your navigation function to close the menu
+// Update your navigation function
 function navigateTo(pageId) {
     // Hide all pages
     document.querySelectorAll('.page').forEach(page => {
@@ -1050,8 +1056,10 @@ function navigateTo(pageId) {
         }
     });
     
-    // Close mobile menu if open - THIS IS THE KEY FIX
-    closeMenu();
+    // Close mobile menu if open - but only on mobile
+    if (isMobile() && navLinks.classList.contains('active')) {
+        closeMenu();
+    }
     
     // Scroll to top when navigating
     window.scrollTo(0, 0);
