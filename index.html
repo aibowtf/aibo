@@ -971,86 +971,91 @@
             navigateTo('home');
         });
 
-        // Mobile Hamburger Menu functionality - FIXED VERSION
-        const hamburger = document.getElementById('hamburger');
-        const navLinks = document.querySelector('.nav-links');
-        const navItems = document.querySelectorAll('.nav-links li');
-        const body = document.body;
+// Mobile Hamburger Menu functionality - FIXED VERSION
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.querySelector('.nav-links');
+const navItems = document.querySelectorAll('.nav-links li');
+const body = document.body;
 
-        // Create overlay element
-        const overlay = document.createElement('div');
-        overlay.className = 'nav-overlay';
-        document.body.appendChild(overlay);
+// Create overlay element
+const overlay = document.createElement('div');
+overlay.className = 'nav-overlay';
+document.body.appendChild(overlay);
 
-        // Toggle menu function
-        function toggleMenu() {
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('active');
-            overlay.classList.toggle('active');
-            body.classList.toggle('no-scroll');
+// Close menu function (call this when navigating)
+function closeMenu() {
+    hamburger.classList.remove('active');
+    navLinks.classList.remove('active');
+    overlay.classList.remove('active');
+    body.classList.remove('no-scroll');
+    
+    // Reset animations
+    navItems.forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(50px)';
+    });
+}
 
-            // Reset animations when closing menu
-            if (!navLinks.classList.contains('active')) {
-                navItems.forEach(item => {
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateX(50px)';
-                });
-            }
+// Toggle menu function
+function toggleMenu() {
+    const isOpening = !navLinks.classList.contains('active');
+    
+    hamburger.classList.toggle('active');
+    navLinks.classList.toggle('active');
+    overlay.classList.toggle('active');
+    body.classList.toggle('no-scroll');
+    
+    // Reset animations when closing menu
+    if (!isOpening) {
+        navItems.forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(50px)';
+        });
+    }
+}
+
+// Hamburger click event
+hamburger.addEventListener('click', toggleMenu);
+
+// Overlay click event (close menu when clicking outside)
+overlay.addEventListener('click', closeMenu);
+
+// Close menu when clicking on nav links
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        closeMenu();
+    });
+});
+
+// Add animation to hamburger icon
+hamburger.addEventListener('click', function() {
+    this.classList.toggle('active');
+});
+
+// Update your navigation function to close the menu
+function navigateTo(pageId) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+    });
+    
+    // Show the selected page
+    document.getElementById(pageId).classList.add('active');
+    
+    // Update active nav link
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-page') === pageId) {
+            link.classList.add('active');
         }
-
-        // Hamburger click event
-        hamburger.addEventListener('click', toggleMenu);
-
-        // Overlay click event (close menu when clicking outside)
-        overlay.addEventListener('click', toggleMenu);
-
-        // Close menu when clicking on nav links
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                if (navLinks.classList.contains('active')) {
-                    toggleMenu();
-                }
-            });
-        });
-
-        // Add animation to hamburger icon
-        hamburger.addEventListener('click', function() {
-            this.classList.toggle('active');
-        });
-
-        // Add styles for the animated hamburger
-        const style = document.createElement('style');
-        style.textContent = `
-            .hamburger {
-                transition: transform 0.3s ease;
-            }
-
-            .hamburger.active {
-                transform: rotate(90deg);
-            }
-
-            .hamburger span {
-                transition: all 0.3s ease;
-            }
-
-            .hamburger.active span:nth-child(1) {
-                transform: rotate(45deg) translate(6px, 6px);
-            }
-
-            .hamburger.active span:nth-child(2) {
-                opacity: 0;
-            }
-
-            .hamburger.active span:nth-child(3) {
-                transform: rotate(-45deg) translate(6px, -6px);
-            }
-
-            body.no-scroll {
-                overflow: hidden;
-                height: 100vh;
-            }
-        `;
-        document.head.appendChild(style);
+    });
+    
+    // Close mobile menu if open - THIS IS THE KEY FIX
+    closeMenu();
+    
+    // Scroll to top when navigating
+    window.scrollTo(0, 0);
+}
     </script>
 </body>
 </html>
