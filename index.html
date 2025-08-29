@@ -995,11 +995,22 @@ function closeMenu() {
     navLinks.classList.remove('active');
     overlay.classList.remove('active');
     body.classList.remove('no-scroll');
+}
+
+// Open menu function with animations
+function openMenu() {
+    if (!isMobile()) return;
     
-    // Reset animations
-    navItems.forEach(item => {
-        item.style.opacity = '0';
-        item.style.transform = 'translateX(50px)';
+    hamburger.classList.add('active');
+    navLinks.classList.add('active');
+    overlay.classList.add('active');
+    body.classList.add('no-scroll');
+    
+    // Animate menu items in with staggered delay
+    navItems.forEach((item, index) => {
+        item.style.opacity = '1';
+        item.style.transform = 'translateX(0)';
+        item.style.transition = `opacity 0.3s ease ${index * 0.1}s, transform 0.3s ease ${index * 0.1}s`;
     });
 }
 
@@ -1007,19 +1018,10 @@ function closeMenu() {
 function toggleMenu() {
     if (!isMobile()) return; // Only toggle menu on mobile
     
-    const isOpening = !navLinks.classList.contains('active');
-    
-    hamburger.classList.toggle('active');
-    navLinks.classList.toggle('active');
-    overlay.classList.toggle('active');
-    body.classList.toggle('no-scroll');
-    
-    // Reset animations when closing menu
-    if (!isOpening) {
-        navItems.forEach(item => {
-            item.style.opacity = '0';
-            item.style.transform = 'translateX(50px)';
-        });
+    if (navLinks.classList.contains('active')) {
+        closeMenu();
+    } else {
+        openMenu();
     }
 }
 
@@ -1038,32 +1040,77 @@ document.querySelectorAll('.nav-links a').forEach(link => {
     });
 });
 
-// Update your navigation function
-function navigateTo(pageId) {
-    // Hide all pages
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    
-    // Show the selected page
-    document.getElementById(pageId).classList.add('active');
-    
-    // Update active nav link
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('data-page') === pageId) {
-            link.classList.add('active');
-        }
-    });
-    
-    // Close mobile menu if open - but only on mobile
-    if (isMobile() && navLinks.classList.contains('active')) {
-        closeMenu();
+// Reset menu item styles when window is resized (in case user rotates device)
+window.addEventListener('resize', function() {
+    if (!isMobile()) {
+        // On desktop, ensure all menu items are visible
+        navItems.forEach(item => {
+            item.style.opacity = '';
+            item.style.transform = '';
+            item.style.transition = '';
+        });
+    } else if (!navLinks.classList.contains('active')) {
+        // On mobile with menu closed, hide menu items
+        navItems.forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(50px)';
+        });
+    }
+});
+
+// Initialize menu item styles on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (isMobile()) {
+        // On mobile, initially hide menu items
+        navItems.forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(50px)';
+            item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        });
+    }
+});
+
+// Add styles for the animated hamburger
+const style = document.createElement('style');
+style.textContent = `
+    .hamburger {
+        transition: transform 0.3s ease;
+    }
+
+    .hamburger.active {
+        transform: rotate(90deg);
+    }
+
+    .hamburger span {
+        transition: all 0.3s ease;
+    }
+
+    .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 6px);
+    }
+
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+    }
+
+    body.no-scroll {
+        overflow: hidden;
+        height: 100vh;
     }
     
-    // Scroll to top when navigating
-    window.scrollTo(0, 0);
-}
+    /* Ensure menu items are visible on desktop */
+    @media (min-width: 769px) {
+        .nav-links li {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+    }
+`;
+document.head.appendChild(style);
     </script>
 </body>
 </html>
