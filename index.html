@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AIbo 相棒</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Your CSS remains unchanged -->
     <style>
         /* [Your existing CSS remains unchanged] */
         /* Doto Font Implementation */
@@ -483,6 +484,7 @@
 
         .mint-detail {
             text-align: center;
+            flex: 1;
         }
 
         .mint-detail .value {
@@ -586,6 +588,7 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             margin-bottom: 2rem;
+            padding: 0 20px;
         }
 
         .footer-column h3 {
@@ -629,19 +632,10 @@
             color: var(--teal);
         }
 
-        .footer-column:nth-child(2) {
-            margin-left: 3rem;
-        }
-
-        .footer-column:nth-child(1) {
-            margin-left: 3rem;
-        }
-
         .social-links {
             display: flex;
             gap: 1rem;
             margin-top: 1rem;
-            margin-left: 7rem;
         }
 
         .social-links a {
@@ -670,7 +664,7 @@
             color: var(--text-muted);
         }
 
-        /* Responsive Design - Keep your existing responsive styles */
+        /* Responsive Design */
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
@@ -703,15 +697,23 @@
             .loading-text {
                 font-size: 2rem;
             }
+        }
 
-            .footer-column:nth-child(2),
-            .footer-column:nth-child(1) {
-                margin-left: 0;
-            }
+        /* Supabase status indicator */
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
 
-            .social-links {
-                margin-left: 0;
-            }
+        .status-online {
+            background-color: var(--teal);
+        }
+
+        .status-offline {
+            background-color: #f72585;
         }
     </style>
 </head>
@@ -768,21 +770,15 @@
 
                 <div class="whitelist-form">
                     <!-- FormSubmit Form - UPDATED -->
-                    <form action="https://formsubmit.co/sora@aibo.wtf" method="POST" id="whitelistForm">
-                        <!-- FormSubmit configuration - UPDATED -->
-                        <input type="hidden" name="_subject" value="New Whitelist Submission - AIbo">
-                        <input type="hidden" name="_autoresponse" value="Thank you for submitting your wallet address to the AIbo whitelist!">
-                        <input type="hidden" name="_template" value="table">
-                        <input type="hidden" name="_next" value="https://aibo.wtf#whitelist">
-                        <input type="hidden" name="_captcha" value="false">
-
+                    <form id="whitelistForm">
                         <div class="form-group">
                             <label for="walletAddress">Wallet Address</label>
                             <input type="text" id="walletAddress" name="walletAddress" placeholder="Enter your Ethereum wallet address (0x...)" required>
                         </div>
                         <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
                         <div class="progress-info">
-                            <p id="submissionCount">0/200 addresses submitted</p>
+                            <p id="submissionCount">Loading...<span class="status-indicator status-offline" id="statusIndicator"></span></p>
+                            <p id="serverStatus" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"></p>
                         </div>
                         <div id="formMessage" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;"></div>
                     </form>
@@ -866,7 +862,16 @@
         </div>
     </footer>
 
+    <!-- Add Supabase CDN -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
+        // Initialize Supabase
+        // REPLACE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS
+        const SUPABASE_URL = 'https://cpmapqoeyahbsuyxsyfh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
         // Navigation functionality
         function navigateTo(pageId) {
             // Hide all pages
@@ -887,6 +892,11 @@
 
             // Scroll to top when navigating
             window.scrollTo(0, 0);
+            
+            // If navigating to whitelist, refresh the count
+            if (pageId === 'whitelist') {
+                getSubmissionCount();
+            }
         }
 
         // Set up navigation event listeners
@@ -934,9 +944,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Set home as active by default
             navigateTo('home');
+            
+            // Initialize whitelist count
+            getSubmissionCount();
         });
 
-        // Mobile Hamburger Menu functionality - FIXED VERSION
+        // Mobile Hamburger Menu functionality
         const hamburger = document.getElementById('hamburger');
         const navLinks = document.querySelector('.nav-links');
         const navItems = document.querySelectorAll('.nav-links li');
@@ -1035,6 +1048,153 @@
             }
         });
 
+        // =============================================
+        // SUPABASE WHITELIST FUNCTIONALITY
+        // =============================================
+        const maxAddresses = 200;
+
+        // Show message to user
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('formMessage');
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            if (type === 'success') {
+                messageDiv.style.backgroundColor = 'rgba(0, 255, 208, 0.1)';
+                messageDiv.style.color = 'var(--teal)';
+                messageDiv.style.border = '1px solid var(--teal-dark)';
+            } else if (type === 'error') {
+                messageDiv.style.backgroundColor = 'rgba(247, 37, 133, 0.1)';
+                messageDiv.style.color = '#f72585';
+                messageDiv.style.border = '1px solid #f72585';
+            }
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Get submission count from Supabase
+        async function getSubmissionCount() {
+            try {
+                document.getElementById('serverStatus').textContent = 'Connecting to server...';
+                
+                const { count, error } = await supabase
+                    .from('whitelist')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (error) throw error;
+                
+                // Update UI with count
+                document.getElementById('submissionCount').innerHTML = 
+                    `${count}/${maxAddresses} addresses submitted <span class="status-indicator status-online" id="statusIndicator"></span>`;
+                document.getElementById('serverStatus').textContent = 'Live count from server';
+                
+                // Disable form if whitelist is full
+                if (count >= maxAddresses) {
+                    document.getElementById('submitBtn').disabled = true;
+                    document.getElementById('submitBtn').textContent = 'Whitelist Full';
+                    document.getElementById('walletAddress').disabled = true;
+                }
+                
+                return count;
+            } catch (error) {
+                console.error('Error getting count:', error);
+                document.getElementById('submissionCount').innerHTML = 
+                    `Error loading count <span class="status-indicator status-offline" id="statusIndicator"></span>`;
+                document.getElementById('serverStatus').textContent = 'Unable to connect to server';
+                return 0;
+            }
+        }
+
+        // Check if address is already submitted
+        async function isDuplicateAddress(address) {
+            try {
+                const { data, error } = await supabase
+                    .from('whitelist')
+                    .select('wallet_address')
+                    .eq('wallet_address', address.toLowerCase());
+                
+                if (error) throw error;
+                
+                return data && data.length > 0;
+            } catch (error) {
+                console.error('Error checking duplicate:', error);
+                // If there's an error checking, assume it's not a duplicate to allow submission
+                return false;
+            }
+        }
+
+        // Submit address to Supabase
+        async function submitAddress(address) {
+            try {
+                const { data, error } = await supabase
+                    .from('whitelist')
+                    .insert([{ wallet_address: address.toLowerCase() }]);
+                
+                if (error) throw error;
+                
+                return true;
+            } catch (error) {
+                console.error('Error submitting address:', error);
+                throw error;
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('whitelistForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent traditional form submission
+            
+            const addressInput = document.getElementById('walletAddress');
+            const address = addressInput.value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Validation checks
+            if (!address) {
+                showMessage('Please enter a wallet address', 'error');
+                return;
+            }
+            
+            // Basic validation for wallet address
+            if (address.length < 20 || !address.match(/^0x[a-fA-F0-9]{40}$/)) {
+                showMessage('Please enter a valid Ethereum wallet address (0x...)', 'error');
+                return;
+            }
+            
+            // Check for duplicates
+            const isDuplicate = await isDuplicateAddress(address);
+            if (isDuplicate) {
+                showMessage('This wallet address has already been submitted', 'error');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                // Submit to Supabase
+                await submitAddress(address);
+                
+                // Update UI
+                showMessage('Wallet address submitted successfully!', 'success');
+                
+                // Clear the input field
+                addressInput.value = '';
+                
+                // Refresh the count
+                await getSubmissionCount();
+            } catch (error) {
+                console.error('Submission error:', error);
+                showMessage('Error submitting address. Please try again.', 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+        });
+
         // Add styles for the animated hamburger
         const style = document.createElement('style');
         style.textContent = `
@@ -1076,137 +1236,6 @@
             }
         `;
         document.head.appendChild(style);
-
-        // =============================================
-        // IMPROVED WHITELIST FUNCTIONALITY - NEW CODE
-        // =============================================
-        let submittedAddresses = JSON.parse(localStorage.getItem('whitelistAddresses')) || [];
-        const maxAddresses = 200;
-
-        // Initialize the count display
-        function updateSubmissionCount() {
-            document.getElementById('submissionCount').textContent = 
-                `${submittedAddresses.length}/${maxAddresses} addresses submitted`;
-            
-            if (submittedAddresses.length >= maxAddresses) {
-                document.getElementById('submitBtn').disabled = true;
-                document.getElementById('submitBtn').textContent = 'Whitelist Full';
-                document.getElementById('walletAddress').disabled = true;
-            }
-        }
-
-        // Check for duplicate addresses
-        function isDuplicateAddress(address) {
-            return submittedAddresses.some(addr => addr.toLowerCase() === address.toLowerCase());
-        }
-
-        // Show message to user
-        function showMessage(message, type) {
-            const messageDiv = document.getElementById('formMessage');
-            messageDiv.textContent = message;
-            messageDiv.style.display = 'block';
-            
-            if (type === 'success') {
-                messageDiv.style.backgroundColor = 'rgba(0, 255, 208, 0.1)';
-                messageDiv.style.color = 'var(--teal)';
-                messageDiv.style.border = '1px solid var(--teal-dark)';
-            } else if (type === 'error') {
-                messageDiv.style.backgroundColor = 'rgba(247, 37, 133, 0.1)';
-                messageDiv.style.color = '#f72585';
-                messageDiv.style.border = '1px solid #f72585';
-            }
-            
-            // Hide message after 5 seconds
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        // Handle form submission
-        document.getElementById('whitelistForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent traditional form submission
-            
-            const addressInput = document.getElementById('walletAddress');
-            const address = addressInput.value.trim();
-            const submitBtn = document.getElementById('submitBtn');
-            
-            // Validation checks
-            if (submittedAddresses.length >= maxAddresses) {
-                showMessage('Whitelist is full! No more addresses can be submitted.', 'error');
-                return;
-            }
-            
-            if (!address) {
-                showMessage('Please enter a wallet address', 'error');
-                return;
-            }
-            
-            // Basic validation for wallet address
-            if (address.length < 20 || !address.match(/^0x[a-fA-F0-9]{40}$/)) {
-                showMessage('Please enter a valid Ethereum wallet address (0x...)', 'error');
-                return;
-            }
-            
-            // Check for duplicates
-            if (isDuplicateAddress(address)) {
-                showMessage('This wallet address has already been submitted', 'error');
-                return;
-            }
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-            
-            // Create FormData for submission
-            const formData = new FormData();
-            formData.append('walletAddress', address);
-            
-            // Add hidden fields
-            const hiddenFields = this.querySelectorAll('input[type="hidden"]');
-            hiddenFields.forEach(field => {
-                formData.append(field.name, field.value);
-            });
-            
-            // Submit to FormSubmit
-            fetch(this.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Add to local storage and update UI
-                    submittedAddresses.push(address);
-                    localStorage.setItem('whitelistAddresses', JSON.stringify(submittedAddresses));
-                    
-                    updateSubmissionCount();
-                    showMessage('Wallet address submitted successfully!', 'success');
-                    
-                    // Clear the input field
-                    addressInput.value = '';
-                } else {
-                    throw new Error('Form submission failed');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('Error submitting address. Please try again.', 'error');
-            })
-            .finally(() => {
-                // Reset button state
-                submitBtn.disabled = submittedAddresses.length >= maxAddresses;
-                submitBtn.textContent = submittedAddresses.length >= maxAddresses ? 'Whitelist Full' : 'Submit';
-            });
-        });
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateSubmissionCount();
-            
-            // Check if we're on the whitelist page and prefill from localStorage if needed
-            if (window.location.hash === '#whitelist' || document.getElementById('whitelist').classList.contains('active')) {
-                navigateTo('whitelist');
-            }
-        });
     </script>
 </body>
 </html>
