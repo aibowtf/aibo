@@ -774,10 +774,6 @@
                             <input type="text" id="walletAddress" name="walletAddress" placeholder="Enter your wallet address..." required>
                         </div>
                         <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
-                        <div class="progress-info">
-                            <p id="submissionCount">Loading...<span class="status-indicator status-offline" id="statusIndicator"></span></p>
-                            <p id="serverStatus" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"></p>
-                        </div>
                         <div id="formMessage" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;"></div>
                     </form>
                 </div>
@@ -860,7 +856,6 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         // Initialize Supabase
-        // REPLACE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS
         const SUPABASE_URL = 'https://cpmapqoeyahbsuyxsyfh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
         
