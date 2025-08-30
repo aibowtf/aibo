@@ -6,6 +6,7 @@
     <title>AIbo 相棒</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* [Your existing CSS remains unchanged] */
         /* Doto Font Implementation */
         @font-face {
             font-family: 'Doto';
@@ -335,6 +336,8 @@
             border-radius: 15px;
             margin-top: 6rem;
             margin-bottom: 3rem;
+            position: relative;
+            z-index: 2;
         }
 
         .hero h1 {
@@ -355,6 +358,8 @@
         .content-section {
             text-align: center;
             padding: 4rem 0;
+            position: relative;
+            z-index: 2;
         }
 
         .content-section h2 {
@@ -379,6 +384,8 @@
             border: 1px solid var(--dark-border);
             max-width: 600px;
             margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
 
         .form-group {
@@ -447,6 +454,8 @@
             border: 1px solid var(--dark-border);
             max-width: 600px;
             margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
 
         .progress-bar {
@@ -509,6 +518,8 @@
         .companions-content {
             text-align: center;
             padding: 4rem 0;
+            position: relative;
+            z-index: 2;
         }
 
         .companions-content h2 {
@@ -527,6 +538,8 @@
         .loading-content {
             text-align: center;
             padding: 6rem 0;
+            position: relative;
+            z-index: 2;
         }
 
         .loading-text {
@@ -564,6 +577,8 @@
             margin-top: auto;
             backdrop-filter: blur(10px);
             border-top: 1px solid var(--dark-border);
+            position: relative;
+            z-index: 2;
         }
 
         .footer-content {
@@ -752,24 +767,24 @@
                 </div>
 
                 <div class="whitelist-form">
-                    <!-- FormSubmit Form -->
+                    <!-- FormSubmit Form - UPDATED -->
                     <form action="https://formsubmit.co/sora@aibo.wtf" method="POST" id="whitelistForm">
-                        <!-- FormSubmit configuration -->
-                        <input type="hidden" name="_subject" value="New Whitelist Submission - hAIpe">
+                        <!-- FormSubmit configuration - UPDATED -->
+                        <input type="hidden" name="_subject" value="New Whitelist Submission - AIbo">
                         <input type="hidden" name="_autoresponse" value="Thank you for submitting your wallet address to the AIbo whitelist!">
                         <input type="hidden" name="_template" value="table">
+                        <input type="hidden" name="_next" value="https://aibo.wtf#whitelist">
                         <input type="hidden" name="_captcha" value="false">
 
                         <div class="form-group">
                             <label for="walletAddress">Wallet Address</label>
-                            <input type="text" id="walletAddress" name="walletAddress" placeholder="Enter your wallet address" required>
+                            <input type="text" id="walletAddress" name="walletAddress" placeholder="Enter your Ethereum wallet address (0x...)" required>
                         </div>
                         <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
                         <div class="progress-info">
                             <p id="submissionCount">0/200 addresses submitted</p>
                         </div>
-                        <div id="formMessage" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;">
-                        </div>
+                        <div id="formMessage" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;"></div>
                     </form>
                 </div>
             </section>
@@ -902,56 +917,6 @@
             }
         });
 
-        // Whitelist functionality for FormSubmit
-        let submittedAddresses = 0;
-        const maxAddresses = 200;
-
-        document.getElementById('whitelistForm').addEventListener('submit', function(e) {
-            const addressInput = document.getElementById('walletAddress');
-            const address = addressInput.value.trim();
-
-            if (submittedAddresses >= maxAddresses) {
-                e.preventDefault();
-                alert('Whitelist is full. No more addresses can be submitted.');
-                return;
-            }
-
-            if (!address) {
-                e.preventDefault();
-                alert('Please enter a wallet address');
-                return;
-            }
-
-            // Basic validation for wallet address
-            if (address.length < 20) {
-                e.preventDefault();
-                alert('Please enter a valid wallet address');
-                return;
-            }
-
-            // If validation passes, the form will submit to FormSubmit
-            submittedAddresses++;
-            updateSubmissionCount();
-
-            // Show loading state
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-        });
-
-        function updateSubmissionCount() {
-            document.getElementById('submissionCount').textContent =
-                `${submittedAddresses}/${maxAddresses} addresses submitted`;
-
-            if (submittedAddresses >= maxAddresses) {
-                document.getElementById('submitBtn').disabled = true;
-                document.getElementById('submitBtn').textContent = 'Whitelist Full';
-            }
-        }
-
-        // Initialize submission count
-        updateSubmissionCount();
-
         // Mint progress functionality
         function updateMintProgress() {
             const minted = 0;
@@ -971,146 +936,277 @@
             navigateTo('home');
         });
 
-// Mobile Hamburger Menu functionality - FIXED VERSION
-const hamburger = document.getElementById('hamburger');
-const navLinks = document.querySelector('.nav-links');
-const navItems = document.querySelectorAll('.nav-links li');
-const body = document.body;
+        // Mobile Hamburger Menu functionality - FIXED VERSION
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        const navItems = document.querySelectorAll('.nav-links li');
+        const body = document.body;
 
-// Create overlay element
-const overlay = document.createElement('div');
-overlay.className = 'nav-overlay';
-document.body.appendChild(overlay);
+        // Create overlay element
+        const overlay = document.createElement('div');
+        overlay.className = 'nav-overlay';
+        document.body.appendChild(overlay);
 
-// Check if we're on mobile
-function isMobile() {
-    return window.innerWidth <= 768;
-}
-
-// Close menu function (only affects mobile)
-function closeMenu() {
-    if (!isMobile()) return; // Only close menu on mobile
-    
-    hamburger.classList.remove('active');
-    navLinks.classList.remove('active');
-    overlay.classList.remove('active');
-    body.classList.remove('no-scroll');
-}
-
-// Open menu function with animations
-function openMenu() {
-    if (!isMobile()) return;
-    
-    hamburger.classList.add('active');
-    navLinks.classList.add('active');
-    overlay.classList.add('active');
-    body.classList.add('no-scroll');
-    
-    // Animate menu items in with staggered delay
-    navItems.forEach((item, index) => {
-        item.style.opacity = '1';
-        item.style.transform = 'translateX(0)';
-        item.style.transition = `opacity 0.3s ease ${index * 0.1}s, transform 0.3s ease ${index * 0.1}s`;
-    });
-}
-
-// Toggle menu function
-function toggleMenu() {
-    if (!isMobile()) return; // Only toggle menu on mobile
-    
-    if (navLinks.classList.contains('active')) {
-        closeMenu();
-    } else {
-        openMenu();
-    }
-}
-
-// Hamburger click event
-hamburger.addEventListener('click', toggleMenu);
-
-// Overlay click event (close menu when clicking outside)
-overlay.addEventListener('click', closeMenu);
-
-// Close menu when clicking on nav links
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        if (isMobile()) {
-            closeMenu();
+        // Check if we're on mobile
+        function isMobile() {
+            return window.innerWidth <= 768;
         }
-    });
-});
 
-// Reset menu item styles when window is resized (in case user rotates device)
-window.addEventListener('resize', function() {
-    if (!isMobile()) {
-        // On desktop, ensure all menu items are visible
-        navItems.forEach(item => {
-            item.style.opacity = '';
-            item.style.transform = '';
-            item.style.transition = '';
-        });
-    } else if (!navLinks.classList.contains('active')) {
-        // On mobile with menu closed, hide menu items
-        navItems.forEach(item => {
-            item.style.opacity = '0';
-            item.style.transform = 'translateX(50px)';
-        });
-    }
-});
-
-// Initialize menu item styles on page load
-document.addEventListener('DOMContentLoaded', function() {
-    if (isMobile()) {
-        // On mobile, initially hide menu items
-        navItems.forEach(item => {
-            item.style.opacity = '0';
-            item.style.transform = 'translateX(50px)';
-            item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        });
-    }
-});
-
-// Add styles for the animated hamburger
-const style = document.createElement('style');
-style.textContent = `
-    .hamburger {
-        transition: transform 0.3s ease;
-    }
-
-    .hamburger.active {
-        transform: rotate(90deg);
-    }
-
-    .hamburger span {
-        transition: all 0.3s ease;
-    }
-
-    .hamburger.active span:nth-child(1) {
-        transform: rotate(45deg) translate(6px, 6px);
-    }
-
-    .hamburger.active span:nth-child(2) {
-        opacity: 0;
-    }
-
-    .hamburger.active span:nth-child(3) {
-        transform: rotate(-45deg) translate(6px, -6px);
-    }
-
-    body.no-scroll {
-        overflow: hidden;
-        height: 100vh;
-    }
-    
-    /* Ensure menu items are visible on desktop */
-    @media (min-width: 769px) {
-        .nav-links li {
-            opacity: 1 !important;
-            transform: none !important;
+        // Close menu function (only affects mobile)
+        function closeMenu() {
+            if (!isMobile()) return; // Only close menu on mobile
+            
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            body.classList.remove('no-scroll');
         }
-    }
-`;
-document.head.appendChild(style);
+
+        // Open menu function with animations
+        function openMenu() {
+            if (!isMobile()) return;
+            
+            hamburger.classList.add('active');
+            navLinks.classList.add('active');
+            overlay.classList.add('active');
+            body.classList.add('no-scroll');
+            
+            // Animate menu items in with staggered delay
+            navItems.forEach((item, index) => {
+                item.style.opacity = '1';
+                item.style.transform = 'translateX(0)';
+                item.style.transition = `opacity 0.3s ease ${index * 0.1}s, transform 0.3s ease ${index * 0.1}s`;
+            });
+        }
+
+        // Toggle menu function
+        function toggleMenu() {
+            if (!isMobile()) return; // Only toggle menu on mobile
+            
+            if (navLinks.classList.contains('active')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        }
+
+        // Hamburger click event
+        hamburger.addEventListener('click', toggleMenu);
+
+        // Overlay click event (close menu when clicking outside)
+        overlay.addEventListener('click', closeMenu);
+
+        // Close menu when clicking on nav links
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (isMobile()) {
+                    closeMenu();
+                }
+            });
+        });
+
+        // Reset menu item styles when window is resized (in case user rotates device)
+        window.addEventListener('resize', function() {
+            if (!isMobile()) {
+                // On desktop, ensure all menu items are visible
+                navItems.forEach(item => {
+                    item.style.opacity = '';
+                    item.style.transform = '';
+                    item.style.transition = '';
+                });
+            } else if (!navLinks.classList.contains('active')) {
+                // On mobile with menu closed, hide menu items
+                navItems.forEach(item => {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(50px)';
+                });
+            }
+        });
+
+        // Initialize menu item styles on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isMobile()) {
+                // On mobile, initially hide menu items
+                navItems.forEach(item => {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(50px)';
+                    item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                });
+            }
+        });
+
+        // Add styles for the animated hamburger
+        const style = document.createElement('style');
+        style.textContent = `
+            .hamburger {
+                transition: transform 0.3s ease;
+            }
+
+            .hamburger.active {
+                transform: rotate(90deg);
+            }
+
+            .hamburger span {
+                transition: all 0.3s ease;
+            }
+
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(6px, 6px);
+            }
+
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(6px, -6px);
+            }
+
+            body.no-scroll {
+                overflow: hidden;
+                height: 100vh;
+            }
+            
+            /* Ensure menu items are visible on desktop */
+            @media (min-width: 769px) {
+                .nav-links li {
+                    opacity: 1 !important;
+                    transform: none !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // =============================================
+        // IMPROVED WHITELIST FUNCTIONALITY - NEW CODE
+        // =============================================
+        let submittedAddresses = JSON.parse(localStorage.getItem('whitelistAddresses')) || [];
+        const maxAddresses = 200;
+
+        // Initialize the count display
+        function updateSubmissionCount() {
+            document.getElementById('submissionCount').textContent = 
+                `${submittedAddresses.length}/${maxAddresses} addresses submitted`;
+            
+            if (submittedAddresses.length >= maxAddresses) {
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('submitBtn').textContent = 'Whitelist Full';
+                document.getElementById('walletAddress').disabled = true;
+            }
+        }
+
+        // Check for duplicate addresses
+        function isDuplicateAddress(address) {
+            return submittedAddresses.some(addr => addr.toLowerCase() === address.toLowerCase());
+        }
+
+        // Show message to user
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('formMessage');
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            if (type === 'success') {
+                messageDiv.style.backgroundColor = 'rgba(0, 255, 208, 0.1)';
+                messageDiv.style.color = 'var(--teal)';
+                messageDiv.style.border = '1px solid var(--teal-dark)';
+            } else if (type === 'error') {
+                messageDiv.style.backgroundColor = 'rgba(247, 37, 133, 0.1)';
+                messageDiv.style.color = '#f72585';
+                messageDiv.style.border = '1px solid #f72585';
+            }
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Handle form submission
+        document.getElementById('whitelistForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent traditional form submission
+            
+            const addressInput = document.getElementById('walletAddress');
+            const address = addressInput.value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Validation checks
+            if (submittedAddresses.length >= maxAddresses) {
+                showMessage('Whitelist is full! No more addresses can be submitted.', 'error');
+                return;
+            }
+            
+            if (!address) {
+                showMessage('Please enter a wallet address', 'error');
+                return;
+            }
+            
+            // Basic validation for wallet address
+            if (address.length < 20 || !address.match(/^0x[a-fA-F0-9]{40}$/)) {
+                showMessage('Please enter a valid Ethereum wallet address (0x...)', 'error');
+                return;
+            }
+            
+            // Check for duplicates
+            if (isDuplicateAddress(address)) {
+                showMessage('This wallet address has already been submitted', 'error');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            // Create FormData for submission
+            const formData = new FormData();
+            formData.append('walletAddress', address);
+            
+            // Add hidden fields
+            const hiddenFields = this.querySelectorAll('input[type="hidden"]');
+            hiddenFields.forEach(field => {
+                formData.append(field.name, field.value);
+            });
+            
+            // Submit to FormSubmit
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Add to local storage and update UI
+                    submittedAddresses.push(address);
+                    localStorage.setItem('whitelistAddresses', JSON.stringify(submittedAddresses));
+                    
+                    updateSubmissionCount();
+                    showMessage('Wallet address submitted successfully!', 'success');
+                    
+                    // Clear the input field
+                    addressInput.value = '';
+                } else {
+                    throw new Error('Form submission failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error submitting address. Please try again.', 'error');
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.disabled = submittedAddresses.length >= maxAddresses;
+                submitBtn.textContent = submittedAddresses.length >= maxAddresses ? 'Whitelist Full' : 'Submit';
+            });
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSubmissionCount();
+            
+            // Check if we're on the whitelist page and prefill from localStorage if needed
+            if (window.location.hash === '#whitelist' || document.getElementById('whitelist').classList.contains('active')) {
+                navigateTo('whitelist');
+            }
+        });
     </script>
 </body>
 </html>
