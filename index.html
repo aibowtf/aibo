@@ -157,23 +157,6 @@
             border-radius: 2px;
         }
 
-        .wallet-btn {
-            background: rgba(0, 255, 208, 0.15);
-            color: var(--teal);
-            border: 1px solid var(--teal-dark);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Doto', sans-serif;
-        }
-
-        .wallet-btn:hover {
-            background: rgba(0, 255, 208, 0.25);
-            transform: translateY(-2px);
-        }
-
         /* Hamburger Menu Styles */
         .hamburger {
             display: none;
@@ -267,7 +250,7 @@
                 top: 0;
                 left: 0;
                 width: 100%;
-            height: 100%;
+                height: 100%;
                 background: rgba(10, 10, 15, 0.8);
                 z-index: 8;
             }
@@ -289,12 +272,6 @@
             
             .hero h1 {
                 font-size: 2.2rem;
-            }
-            
-            /* Make sure wallet button is visible */
-            .wallet-btn {
-                z-index: 10;
-                position: relative;
             }
             
             /* Prevent body scrolling when menu is open */
@@ -740,7 +717,7 @@
                     <li><a href="#" data-page="companions">ENERGY</a></li>
                     <li><a href="#" data-page="loading">MATTER</a></li>
                 </ul>
-                <button class="wallet-btn" id="walletButton">Connect wallet</button>
+                <!-- Wallet button removed -->
             </nav>
         </div>
     </header>
@@ -771,11 +748,11 @@
                     <form id="whitelistForm">
                         <div class="form-group">
                             <label for="walletAddress">Wallet Address</label>
-                            <input type="text" id="walletAddress" name="walletAddress" placeholder="Enter your wallet address..." required>
+                            <input type="text" id="walletAddress" name="walletAddress" placeholder="Enter your Ethereum wallet address (0x...)" required>
                         </div>
                         <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
                         <div class="progress-info">
-                            <p id="submissionCount">Loading...<span class="status-indicator status-offline" id="statusIndicator"></span></p>
+                            <p id="submissionCount">Loading...<span class="status-indicator" id="statusIndicator"></span></p>
                             <p id="serverStatus" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"></p>
                         </div>
                         <div id="formMessage" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;"></div>
@@ -787,7 +764,7 @@
             <section id="mint" class="page">
                 <div class="content-section">
                     <h2>Mint</h2>
-                    <p>Minting through the Drip.Trade launchpad. Date TBA</p>
+                    <p>Minting through the Drip.Trade launchpad</p>
                 </div>
 
                 <div class="mint-info">
@@ -913,20 +890,6 @@
             navigateTo('whitelist');
         });
 
-        // Wallet connection functionality
-        document.getElementById('walletButton').addEventListener('click', function() {
-            const button = this;
-            if (button.textContent === 'Connect wallet') {
-                // Simulate wallet connection
-                button.textContent = 'a1sz...x24f';
-                button.style.backgroundColor = 'rgba(0, 255, 208, 0.25)';
-            } else {
-                // Simulate wallet disconnection
-                button.textContent = 'Connect wallet';
-                button.style.backgroundColor = '';
-            }
-        });
-
         // Mint progress functionality
         function updateMintProgress() {
             const minted = 0;
@@ -962,48 +925,90 @@
             }, 5000);
         }
 
-// UPDATED f(x) 
-async function getSubmissionCount() {
-    try {
-        document.getElementById('serverStatus').textContent = 'Connecting to server...';
-        document.getElementById('statusIndicator').className = 'status-indicator status-offline';
-        
-        const { count, error } = await supabase
-            .from('whitelist')
-            .select('*', { count: 'exact', head: true });
-        
-        if (error) {
-            console.error('Supabase error:', error);
-            throw error;
+        // Get submission count from Supabase
+        async function getSubmissionCount() {
+            try {
+                const statusElement = document.getElementById('statusIndicator');
+                const serverStatusElement = document.getElementById('serverStatus');
+                
+                if (serverStatusElement) {
+                    serverStatusElement.textContent = 'Connecting to server...';
+                }
+                
+                if (statusElement) {
+                    statusElement.className = 'status-indicator status-offline';
+                }
+                
+                const { count, error } = await supabase
+                    .from('whitelist')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
+                
+                // Update UI with count
+                const submissionCountElement = document.getElementById('submissionCount');
+                if (submissionCountElement) {
+                    submissionCountElement.innerHTML = 
+                        `${count}/${maxAddresses} addresses submitted <span class="status-indicator status-online"></span>`;
+                }
+                
+                if (serverStatusElement) {
+                    serverStatusElement.textContent = 'Live count from server';
+                }
+                
+                if (statusElement) {
+                    statusElement.className = 'status-indicator status-online';
+                }
+                
+                // Disable form if whitelist is full
+                const submitBtn = document.getElementById('submitBtn');
+                const walletAddress = document.getElementById('walletAddress');
+                
+                if (count >= maxAddresses) {
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = 'Whitelist Full';
+                    }
+                    if (walletAddress) {
+                        walletAddress.disabled = true;
+                    }
+                } else {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit';
+                    }
+                    if (walletAddress) {
+                        walletAddress.disabled = false;
+                    }
+                }
+                
+                return count;
+            } catch (error) {
+                console.error('Error getting count:', error);
+                
+                const submissionCountElement = document.getElementById('submissionCount');
+                const serverStatusElement = document.getElementById('serverStatus');
+                const statusElement = document.getElementById('statusIndicator');
+                
+                if (submissionCountElement) {
+                    submissionCountElement.innerHTML = 
+                        `Error loading count <span class="status-indicator status-offline"></span>`;
+                }
+                
+                if (serverStatusElement) {
+                    serverStatusElement.textContent = 'Unable to connect to server: ' + error.message;
+                }
+                
+                if (statusElement) {
+                    statusElement.className = 'status-indicator status-offline';
+                }
+                
+                return 0;
+            }
         }
-        
-        // Update UI with count
-        document.getElementById('submissionCount').innerHTML = 
-            `${count}/${maxAddresses} addresses submitted <span class="status-indicator status-online"></span>`;
-        document.getElementById('serverStatus').textContent = 'Live count from server';
-        document.getElementById('statusIndicator').className = 'status-indicator status-online';
-        
-        // Disable form if whitelist is full
-        if (count >= maxAddresses) {
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('submitBtn').textContent = 'Whitelist Full';
-            document.getElementById('walletAddress').disabled = true;
-        } else {
-            document.getElementById('submitBtn').disabled = false;
-            document.getElementById('submitBtn').textContent = 'Submit';
-            document.getElementById('walletAddress').disabled = false;
-        }
-        
-        return count;
-    } catch (error) {
-        console.error('Error getting count:', error);
-        document.getElementById('submissionCount').innerHTML = 
-            `Error loading count <span class="status-indicator status-offline"></span>`;
-        document.getElementById('serverStatus').textContent = 'Unable to connect to server: ' + error.message;
-        document.getElementById('statusIndicator').className = 'status-indicator status-offline';
-        return 0;
-    }
-}
 
         // Check if address is already submitted
         async function isDuplicateAddress(address) {
@@ -1039,89 +1044,90 @@ async function getSubmissionCount() {
             }
         }
 
-function setupRealtimeUpdates() {
-    // Subscribe to insert events
-    const subscription = supabase
-        .channel('whitelist-changes')
-        .on('postgres_changes', 
-            { 
-                event: 'INSERT', 
-                schema: 'public', 
-                table: 'whitelist' 
-            }, 
-            (payload) => {
-                console.log('New submission detected:', payload);
-                // Refresh the count when a new submission is added
-                getSubmissionCount();
-            }
-        )
-        .subscribe();
-    
-    return subscription;
-}
-        
-       // Replace your form submission handler with this:
-document.getElementById('whitelistForm').addEventListener('submit', async function(e) {
-    e.preventDefault(); // Prevent traditional form submission
-    
-    const addressInput = document.getElementById('walletAddress');
-    const address = addressInput.value.trim();
-    const submitBtn = document.getElementById('submitBtn');
-    
-    // Validation checks
-    if (!address) {
-        showMessage('Please enter a wallet address', 'error');
-        return;
-    }
-    
-    // Basic validation for wallet address
-    if (address.length < 20 || !address.match(/^0x[a-fA-F0-9]{40}$/)) {
-        showMessage('Please enter a valid Ethereum wallet address (0x...)', 'error');
-        return;
-    }
-    
-    // Check for duplicates
-    const isDuplicate = await isDuplicateAddress(address);
-    if (isDuplicate) {
-        showMessage('This wallet address has already been submitted', 'error');
-        return;
-    }
-    
-    // Show loading state
-    const originalBtnText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting...';
-    
-    try {
-        // Submit to Supabase
-        const { data, error } = await supabase
-            .from('whitelist')
-            .insert([{ wallet_address: address.toLowerCase() }])
-            .select();
-        
-        if (error) {
-            console.error('Supabase insert error:', error);
-            throw error;
+        // Set up real-time updates
+        function setupRealtimeUpdates() {
+            // Subscribe to insert events
+            const subscription = supabase
+                .channel('whitelist-changes')
+                .on('postgres_changes', 
+                    { 
+                        event: 'INSERT', 
+                        schema: 'public', 
+                        table: 'whitelist' 
+                    }, 
+                    (payload) => {
+                        console.log('New submission detected:', payload);
+                        // Refresh the count when a new submission is added
+                        getSubmissionCount();
+                    }
+                )
+                .subscribe();
+            
+            return subscription;
         }
-        
-        // Update UI
-        showMessage('Wallet address submitted successfully!', 'success');
-        
-        // Clear the input field
-        addressInput.value = '';
-        
-        // Force refresh the count (in case realtime isn't working)
-        await getSubmissionCount();
-        
-    } catch (error) {
-        console.error('Submission error:', error);
-        showMessage('Error submitting address: ' + error.message, 'error');
-    } finally {
-        // Reset button state
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalBtnText;
-    }
-});
+
+        // Handle form submission
+        document.getElementById('whitelistForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent traditional form submission
+            
+            const addressInput = document.getElementById('walletAddress');
+            const address = addressInput.value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Validation checks
+            if (!address) {
+                showMessage('Please enter a wallet address', 'error');
+                return;
+            }
+            
+            // Basic validation for wallet address
+            if (address.length < 20 || !address.match(/^0x[a-fA-F0-9]{40}$/)) {
+                showMessage('Please enter a valid Ethereum wallet address (0x...)', 'error');
+                return;
+            }
+            
+            // Check for duplicates
+            const isDuplicate = await isDuplicateAddress(address);
+            if (isDuplicate) {
+                showMessage('This wallet address has already been submitted', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                // Submit to Supabase
+                const { data, error } = await supabase
+                    .from('whitelist')
+                    .insert([{ wallet_address: address.toLowerCase() }])
+                    .select();
+                
+                if (error) {
+                    console.error('Supabase insert error:', error);
+                    throw error;
+                }
+                
+                // Update UI
+                showMessage('Wallet address submitted successfully!', 'success');
+                
+                // Clear the input field
+                addressInput.value = '';
+                
+                // Force refresh the count (in case realtime isn't working)
+                await getSubmissionCount();
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                showMessage('Error submitting address: ' + error.message, 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
+        });
 
         // Add this function to automatically refresh the count every 30 seconds
         function startCountRefresher() {
@@ -1129,7 +1135,7 @@ document.getElementById('whitelistForm').addEventListener('submit', async functi
             getSubmissionCount();
             
             // Then set up periodic refreshing
-            setInterval(getSubmissionCount, 60000); // Refresh every 60 seconds
+            setInterval(getSubmissionCount, 30000); // Refresh every 30 seconds
         }
 
         // Initialize active state on page load
@@ -1139,8 +1145,8 @@ document.getElementById('whitelistForm').addEventListener('submit', async functi
             
             // Initialize whitelist count with auto-refresh
             startCountRefresher();
-
-            // Set up real-time updates - ADD THIS LINE
+            
+            // Set up real-time updates
             setupRealtimeUpdates();
         });
 
