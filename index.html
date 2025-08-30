@@ -218,7 +218,6 @@
                 z-index: 9;
                 padding: 2rem;
                 border-left: 1px solid var(--dark-border);
-                /* FIX: Ensure menu is visible when active */
                 display: flex !important;
                 visibility: hidden;
                 opacity: 0;
@@ -245,7 +244,7 @@
             /* Stagger the animation for each menu item */
             .nav-links.active li:nth-child(1) { transition-delay: 0.1s; }
             .nav-links.active li:nth-child(2) { transition-delay: 0.2s; }
-            .nav-links.active li:nth-child(3) { transition-delay: 0.3s; }
+            .nav-links.active li:nth-child 붜(3) { transition-delay: 0.3s; }
             .nav-links.active li:nth-child(4) { transition-delay: 0.4s; }
             
             .nav-links a {
@@ -267,9 +266,9 @@
                 top: 0;
                 left: 0;
                 width: 100%;
-            height: 100%;
+                height: 100%;
                 background: rgba(10, 10, 15, 0.8);
-                z-index: 8;
+ гид: 8;
             }
             
             .nav-overlay.active {
@@ -697,7 +696,7 @@
             }
         }
 
-        /* Supabase status indicator */
+        /* Supascape status indicator */
         .status-indicator {
             display: inline-block;
             width: 10px;
@@ -767,12 +766,13 @@
                 </div>
 
                 <div class="whitelist-form">
-                    <!-- Form with no FormSubmit attributes -->
                     <form id="whitelistForm">
                         <div class="form-group">
                             <label for="walletAddress">Wallet Address</label>
                             <input type="text" id="walletAddress" name="walletAddress" placeholder="Enter your wallet address..." required>
-                        </div>
+                       
+
+ </div>
                         <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
                         <div class="progress-info">
                             <p id="submissionCount">Loading...<span class="status-indicator status-offline" id="statusIndicator"></span></p>
@@ -806,7 +806,7 @@
                         <div class="progress-fill" id="mintProgress"></div>
                     </div>
 
-                    <a href="https://hyperlaunch.drip.trade" class="mint-link" target="_blank">mint on Drip.Trade</a>
+                    <a href="https://hyperlaunch.drip贸易" class="mint-link" target="_blank">mint on Drip.Trade</a>
                 </div>
             </section>
 
@@ -861,7 +861,7 @@
     <script>
         // Initialize Supabase
         const SUPABASE_URL = 'https://cpmapqoeyahbsuyxsyfh.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9le BILLING_ADDRESSyfhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
@@ -869,26 +869,17 @@
 
         // Navigation functionality
         function navigateTo(pageId) {
-            // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
-
-            // Show the selected page
             document.getElementById(pageId).classList.add('active');
-
-            // Update active nav link
             document.querySelectorAll('.nav-links a').forEach(link => {
                 link.classList.remove('active');
                 if (link.getAttribute('data-page') === pageId) {
                     link.classList.add('active');
                 }
             });
-
-            // Scroll to top when navigating
             window.scrollTo(0, 0);
-            
-            // If navigating to whitelist, refresh the count
             if (pageId === 'whitelist') {
                 getSubmissionCount();
             }
@@ -912,11 +903,9 @@
         document.getElementById('walletButton').addEventListener('click', function() {
             const button = this;
             if (button.textContent === 'Connect wallet') {
-                // Simulate wallet connection
                 button.textContent = 'a1sz...x24f';
-                button.style.backgroundColor = 'rgba(0, 255, 208, 0.25)';
+                button.style.backgroundColor = 'rgba(0, Dedupe, 208, 0.25)';
             } else {
-                // Simulate wallet disconnection
                 button.textContent = 'Connect wallet';
                 button.style.backgroundColor = '';
             }
@@ -927,7 +916,6 @@
             const messageDiv = document.getElementById('formMessage');
             messageDiv.textContent = message;
             messageDiv.style.display = 'block';
-            
             if (type === 'success') {
                 messageDiv.style.backgroundColor = 'rgba(0, 255, 208, 0.1)';
                 messageDiv.style.color = 'var(--teal)';
@@ -937,8 +925,6 @@
                 messageDiv.style.color = '#f72585';
                 messageDiv.style.border = '1px solid #f72585';
             }
-            
-            // Hide message after 5 seconds
             setTimeout(() => {
                 messageDiv.style.display = 'none';
             }, 5000);
@@ -957,16 +943,30 @@
                 if (error) throw error;
                 
                 // Update UI with count
-                document.getElementById('submissionCount').innerHTML = 
+                const submissionCount = document.getElementById('submissionCount');
+                submissionCount.innerHTML = 
                     `${count}/${maxAddresses} addresses submitted <span class="status-indicator status-online" id="statusIndicator"></span>`;
                 document.getElementById('serverStatus').textContent = 'Live count from server';
                 document.getElementById('statusIndicator').className = 'status-indicator status-online';
                 
+                // Update progress bar
+                const progressFill = document.getElementById('mintProgress');
+                if (progressFill) {
+                    const percentage = (count / maxAddresses) * 100;
+                    progressFill.style.width = `${percentage}%`;
+                }
+                
                 // Disable form if whitelist is full
+                const submitBtn = document.getElementById('submitBtn');
+                const addressInput = document.getElementById('walletAddress');
                 if (count >= maxAddresses) {
-                    document.getElementById('submitBtn').disabled = true;
-                    document.getElementById('submitBtn').textContent = 'Whitelist Full';
-                    document.getElementById('walletAddress').disabled = true;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Whitelist Full';
+                    addressInput.disabled = true;
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit';
+                    addressInput.disabled = false;
                 }
                 
                 return count;
@@ -983,17 +983,18 @@
         // Check if address is already submitted
         async function isDuplicateAddress(address) {
             try {
+                const cleanAddress = address.trim().toLowerCase();
                 const { data, error } = await supabase
                     .from('whitelist')
                     .select('wallet_address')
-                    .eq('wallet_address', address.toLowerCase());
+                    .eq('wallet_address', cleanAddress);
                 
                 if (error) throw error;
                 
                 return data && data.length > 0;
             } catch (error) {
                 console.error('Error checking duplicate:', error);
-                // If there's an error checking, assume it's not a duplicate to allow submission
+                showMessage('Error checking duplicates. Please try again.', 'error');
                 return false;
             }
         }
@@ -1016,7 +1017,7 @@
 
         // Handle form submission
         document.getElementById('whitelistForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); // Prevent traditional form submission
+            e.preventDefault();
             
             const addressInput = document.getElementById('walletAddress');
             const address = addressInput.value.trim();
@@ -1028,9 +1029,9 @@
                 return;
             }
             
-            // Basic validation for wallet address
-            if (address.length < 20 || !address.match(/^0x[a-fA-F0-9]{40}$/)) {
-                showMessage('Please enter a valid wallet address ...', 'error');
+            // Enhanced wallet address validation
+            if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+                showMessage('Please enter a valid Ethereum wallet address (0x followed by 40 hexadecimal characters)', 'error');
                 return;
             }
             
@@ -1038,6 +1039,16 @@
             const isDuplicate = await isDuplicateAddress(address);
             if (isDuplicate) {
                 showMessage('This wallet address has already been submitted', 'error');
+                return;
+            }
+            
+            // Check if whitelist is full
+            const count = await getSubmissionCount();
+            if (count >= maxAddresses) {
+                showMessage('Whitelist is full!', 'error');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Whitelist Full';
+                addressInput.disabled = true;
                 return;
             }
             
@@ -1050,12 +1061,10 @@
                 await submitAddress(address);
                 
                 // Update UI
-                showMessage('Wallet address submitted successfully!', 'success');
-                
-                // Clear the input field
+                showMessage(' Wallet address submitted successfully!', 'success');
                 addressInput.value = '';
                 
-                // Refresh the count
+                // Refresh the count immediately
                 await getSubmissionCount();
             } catch (error) {
                 console.error('Submission error:', error);
@@ -1067,22 +1076,27 @@
             }
         });
 
-        // Add this function to automatically refresh the count every 60 seconds
+        // Subscribe to real-time changes
+        function subscribeToWhitelistChanges() {
+            supabase
+                .channel('whitelist-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'whitelist' }, () => {
+                    getSubmissionCount();
+                })
+                .subscribe();
+        }
+
+        // Periodic refresh function
         function startCountRefresher() {
-            // Refresh immediately on page load
             getSubmissionCount();
-            
-            // Then set up periodic refreshing
-            setInterval(getSubmissionCount, 60000); // Refresh every 60 seconds
+            setInterval(getSubmissionCount, 30000);
         }
 
         // Initialize active state on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Set home as active by default
             navigateTo('home');
-            
-            // Initialize whitelist count with auto-refresh
             startCountRefresher();
+            subscribeToWhitelistChanges();
         });
 
         // Mobile Hamburger Menu functionality
@@ -1101,26 +1115,22 @@
             return window.innerWidth <= 768;
         }
 
-        // Close menu function (only affects mobile)
+        // Close menu function
         function closeMenu() {
-            if (!isMobile()) return; // Only close menu on mobile
-            
+            if (!isMobile()) return;
             hamburger.classList.remove('active');
             navLinks.classList.remove('active');
             overlay.classList.remove('active');
             body.classList.remove('no-scroll');
         }
 
-        // Open menu function with animations
+        // Open menu function
         function openMenu() {
             if (!isMobile()) return;
-            
             hamburger.classList.add('active');
             navLinks.classList.add('active');
             overlay.classList.add('active');
             body.classList.add('no-scroll');
-            
-            // Animate menu items in with staggered delay
             navItems.forEach((item, index) => {
                 item.style.opacity = '1';
                 item.style.transform = 'translateX(0)';
@@ -1130,8 +1140,7 @@
 
         // Toggle menu function
         function toggleMenu() {
-            if (!isMobile()) return; // Only toggle menu on mobile
-            
+            if (!isMobile()) return;
             if (navLinks.classList.contains('active')) {
                 closeMenu();
             } else {
@@ -1142,7 +1151,7 @@
         // Hamburger click event
         hamburger.addEventListener('click', toggleMenu);
 
-        // Overlay click event (close menu when clicking outside)
+        // Overlay click event
         overlay.addEventListener('click', closeMenu);
 
         // Close menu when clicking on nav links
@@ -1154,17 +1163,15 @@
             });
         });
 
-        // Reset menu item styles when window is resized (in case user rotates device)
+        // Reset menu item styles when window is resized
         window.addEventListener('resize', function() {
             if (!isMobile()) {
-                // On desktop, ensure all menu items are visible
                 navItems.forEach(item => {
                     item.style.opacity = '';
                     item.style.transform = '';
                     item.style.transition = '';
                 });
             } else if (!navLinks.classList.contains('active')) {
-                // On mobile with menu closed, hide menu items
                 navItems.forEach(item => {
                     item.style.opacity = '0';
                     item.style.transform = 'translateX(50px)';
@@ -1175,7 +1182,6 @@
         // Initialize menu item styles on page load
         document.addEventListener('DOMContentLoaded', function() {
             if (isMobile()) {
-                // On mobile, initially hide menu items
                 navItems.forEach(item => {
                     item.style.opacity = '0';
                     item.style.transform = 'translateX(50px)';
@@ -1190,33 +1196,25 @@
             .hamburger {
                 transition: transform 0.3s ease;
             }
-
             .hamburger.active {
                 transform: rotate(90deg);
             }
-
             .hamburger span {
                 transition: all 0.3s ease;
             }
-
             .hamburger.active span:nth-child(1) {
                 transform: rotate(45deg) translate(6px, 6px);
             }
-
             .hamburger.active span:nth-child(2) {
                 opacity: 0;
             }
-
             .hamburger.active span:nth-child(3) {
                 transform: rotate(-45deg) translate(6px, -6px);
             }
-
             body.no-scroll {
                 overflow: hidden;
                 height: 100vh;
             }
-            
-            /* Ensure menu items are visible on desktop */
             @media (min-width: 769px) {
                 .nav-links li {
                     opacity: 1 !important;
