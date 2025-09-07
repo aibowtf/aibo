@@ -761,6 +761,24 @@
             }
         });
 
+        // Handle clicks outside whitelist form to return to home page
+        document.addEventListener('click', (e) => {
+            const whitelistPage = document.getElementById('whitelist');
+            const whitelistForm = document.querySelector('.whitelist-form');
+            const star = e.target.closest('.star');
+            const popup = e.target.closest('.popup');
+            const joinWhitelistBtn = e.target.closest('#joinWhitelistBtn');
+        
+            // If whitelist page is active and click is outside the form, stars, pop-ups, and Join Whitelist button, navigate to home
+            if (whitelistPage.classList.contains('active') && 
+                !whitelistForm.contains(e.target) && 
+                !star && 
+                !popup && 
+                !joinWhitelistBtn) {
+                navigateTo('home');
+            }
+        });
+
         // Initialize active state on page load
         document.addEventListener('DOMContentLoaded', function() {
             navigateTo('home');
