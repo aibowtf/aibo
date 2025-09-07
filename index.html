@@ -171,6 +171,12 @@
             max-height: 400px;
             transform: translateY(-50%); /* Centers vertically */
             z-index: 3;
+            transition: opacity 0.3s ease;
+        }
+
+        .cassiopeia-menu.hidden {
+            opacity: 0;
+            pointer-events: none; /* Prevent interaction when hidden */
         }
 
         .star {
@@ -544,8 +550,14 @@
             });
             document.getElementById(pageId).classList.add('active');
             window.scrollTo(0, 0);
+        
+            // Show/hide Cassiopeia menu based on page
+            const cassiopeiaMenu = document.querySelector('.cassiopeia-menu');
             if (pageId === 'whitelist') {
+                cassiopeiaMenu.classList.add('hidden'); // Hide menu on whitelist page
                 getSubmissionCount();
+            } else {
+                cassiopeiaMenu.classList.remove('hidden'); // Show menu on home page
             }
         }
 
@@ -769,13 +781,12 @@
             const popup = e.target.closest('.popup');
             const joinWhitelistBtn = e.target.closest('#joinWhitelistBtn');
         
-            // If whitelist page is active and click is outside the form, stars, pop-ups, and Join Whitelist button, navigate to home
             if (whitelistPage.classList.contains('active') && 
                 !whitelistForm.contains(e.target) && 
                 !star && 
                 !popup && 
                 !joinWhitelistBtn) {
-                navigateTo('home');
+                navigateTo('home'); // This will also show the Cassiopeia menu
             }
         });
 
