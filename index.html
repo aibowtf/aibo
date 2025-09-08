@@ -847,7 +847,7 @@
             setInterval(getSubmissionCount, 30000);
         }
 
-       // Cassiopeia Menu Functionality
+      // Cassiopeia Menu Functionality
         function showPopup(star, popupId) {
             // Hide all pop-ups first
             document.querySelectorAll('.popup').forEach(popup => {
@@ -864,49 +864,81 @@
             if (popup && star) {
                 // Move to body for isolation from rotation
                 document.body.appendChild(popup);
+                popup.classList.add('active'); // Add active to make it visible for measurement
         
-                // Check if mobile (for centered pop-ups)
+                // Check if mobile (for centered pop-ups via CSS)
                 const isMobile = window.innerWidth <= 768;
-                if (!isMobile) {
-                    // Desktop: Position near star
-                    const starRect = star.getBoundingClientRect();
-                    const offsetX = 20;
-                    const offsetY = -10;
+                if (isMobile) {
+                    // On mobile, CSS handles centering—no JS positioning needed
+                    return;
+                }
         
-                    let left = starRect.right + offsetX;
-                    let top = starRect.top + offsetY;
+                // Desktop: Position near star (use requestAnimationFrame for accurate dimensions after render)
+                requestAnimationFrame(() => {
+                    const starRect = star.getBoundingClientRect();
+                    const edgeMargin = 10; // Minimum pixels from screen edge
+                    const offsetX = 25; // Increased horizontal offset for more clearance
+                    const offsetY = -15; // Slight upward offset, adjusted for tilt
+        
+                    // Get actual popup dimensions now that it's visible
+                    const popupRect = popup.getBoundingClientRect();
+                    const popupWidth = popupRect.width;
+                    const popupHeight = popupRect.height;
         
                     const viewportWidth = window.innerWidth;
                     const viewportHeight = window.innerHeight;
-                    const popupWidth = popup.offsetWidth || 300;
-                    const popupHeight = popup.offsetHeight || 200;
         
-                    if (left + popupWidth > viewportWidth) {
+                    // Preferred: Right of star
+                    let left = starRect.right + offsetX;
+                    let top = (starRect.top + starRect.bottom) / 2 - popupHeight / 2 + offsetY; // Center vertically on star
+        
+                    let isValidPosition = true;
+        
+                    // Check right cutoff
+                    if (left + popupWidth > viewportWidth - edgeMargin) {
+                        // Fallback: Left of star
                         left = starRect.left - popupWidth - offsetX;
+                        if (left < edgeMargin) {
+                            // If left also cuts off, center horizontally
+                            left = (viewportWidth - popupWidth) / 2;
+                            isValidPosition = false;
+                        }
                     }
-                    if (top < 0) {
-                        top = starRect.bottom;
+        
+                    // Clamp top to prevent vertical cutoff
+                    if (top < edgeMargin) {
+                        top = edgeMargin;
                     }
-                    if (top + popupHeight > viewportHeight) {
-                        top = viewportHeight - popupHeight - 10;
+                    if (top + popupHeight > viewportHeight - edgeMargin) {
+                        top = viewportHeight - popupHeight - edgeMargin;
                     }
+        
+                    // Vertical fallback if too close to star or edges
+                    if (Math.abs(top - starRect.top) < 20 || !isValidPosition) {
+                        top = starRect.bottom + offsetY; // Below star if above is too close
+                        if (top + popupHeight > viewportHeight - edgeMargin) {
+                            top = (viewportHeight - popupHeight) / 2; // Center vertically as last resort
+                        }
+                    }
+        
+                    // Final clamp and apply
+                    left = Math.max(edgeMargin, Math.min(left, viewportWidth - popupWidth - edgeMargin));
+                    top = Math.max(edgeMargin, Math.min(top, viewportHeight - popupHeight - edgeMargin));
         
                     popup.style.left = left + 'px';
                     popup.style.top = top + 'px';
                     popup.classList.add('positioned');
-                } // On mobile, do nothing—CSS will center it
-        
-                popup.classList.add('active');
+                });
             }
         }
-
+        
         document.querySelectorAll('.star').forEach(star => {
             star.addEventListener('click', () => {
                 const popupId = star.getAttribute('data-popup');
                 showPopup(star, popupId);
             });
         });
-
+        
         // Close pop-up when clicking the close button
         document.querySelectorAll('.popup-close').forEach(closeBtn => {
             closeBtn.addEventListener('click', (e) => {
@@ -921,7 +953,7 @@
                 menu.appendChild(popup);
             });
         });
-
+        
         // Close pop-up when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.star') && !e.target.closest('.popup')) {
@@ -937,7 +969,6 @@
                 });
             }
         });
-
         // Handle clicks outside whitelist form to return to home page
         document.addEventListener('click', (e) => {
             const whitelistPage = document.getElementById('whitelist');
