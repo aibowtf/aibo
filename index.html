@@ -462,7 +462,7 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            /* Mobile: Make menu relative and full-width, stacked above hero */
+            /* Mobile: Make menu relative and full-width, stacked above hero, shifted down */
             .cassiopeia-menu {
                 position: relative; /* Stacks in flow instead of fixed */
                 width: 100vw;
@@ -471,46 +471,54 @@
                 top: auto; /* Remove fixed positioning */
                 right: auto;
                 transform: rotate(10deg); /* Keep subtle tilt */
-                margin: 1rem 0; /* Add vertical spacing */
+                margin: 2rem 0 1rem 0; /* Increased top margin to shift down, bottom for spacing */
                 display: flex;
                 justify-content: center; /* Center the "W" horizontally */
                 align-items: center;
                 padding: 2rem 0;
             }
-
+        
             /* Adjust star positions for stacked layout */
             #shedar { top: 10%; left: 20%; }
             #caph { top: 10%; left: 80%; }
             #gamma-cas { top: 50%; left: 50%; }
             #ruchbah { top: 90%; left: 30%; }
             #segin { top: 90%; left: 70%; }
-
+        
             .star {
                 width: 14px;
                 height: 14px;
             }
-
-            /* Push hero content below menu with padding on main */
+        
+            /* Push hero content (AIbo + Join Whitelist) below menu and shift down */
             main {
                 padding-top: 0; /* Reset desktop padding */
             }
-
+        
             .hero {
                 padding: 2rem 0; /* Reduce padding */
-                margin-top: 0; /* Remove top margin */
+                margin-top: 2rem; /* Shift hero down for additional spacing */
                 display: block; /* Ensure block flow */
             }
-
+        
             .hero-content {
                 max-width: 100%;
                 padding-left: 0;
             }
-
+        
             .hero h1 {
                 font-size: 2.5rem;
             }
-
-            /* Pop-up adjustments for mobile */
+        
+            /* Center pop-ups on mobile to prevent cutoffs */
+            .popup.active {
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: 90vw;
+                max-width: 90vw;
+            }
+        
             .popup {
                 max-width: 90vw;
                 width: 90vw;
@@ -839,7 +847,7 @@
             setInterval(getSubmissionCount, 30000);
         }
 
-        // Cassiopeia Menu Functionality
+       // Cassiopeia Menu Functionality
         function showPopup(star, popupId) {
             // Hide all pop-ups first
             document.querySelectorAll('.popup').forEach(popup => {
@@ -851,41 +859,44 @@
                     menu.appendChild(popup);
                 }
             });
-
+        
             const popup = document.getElementById(popupId);
             if (popup && star) {
                 // Move to body for isolation from rotation
                 document.body.appendChild(popup);
-
-                // Get star's position (accounts for menu rotation via getBoundingClientRect)
-                const starRect = star.getBoundingClientRect();
-                const offsetX = 20; // Horizontal offset from star
-                const offsetY = -10; // Vertical offset (slightly above for better visibility)
-
-                // Position pop-up near star: right of star if space, else below
-                let left = starRect.right + offsetX;
-                let top = starRect.top + offsetY;
-
-                // Check viewport bounds to prevent off-screen
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                const popupWidth = popup.offsetWidth || 300; // Approximate if not rendered yet
-                const popupHeight = popup.offsetHeight || 200;
-
-                if (left + popupWidth > viewportWidth) {
-                    left = starRect.left - popupWidth - offsetX; // Position to left
-                }
-                if (top < 0) {
-                    top = starRect.bottom; // Position below if too high
-                }
-                if (top + popupHeight > viewportHeight) {
-                    top = viewportHeight - popupHeight - 10; // Clamp to bottom
-                }
-
-                // Set explicit position
-                popup.style.left = left + 'px';
-                popup.style.top = top + 'px';
-                popup.classList.add('active', 'positioned');
+        
+                // Check if mobile (for centered pop-ups)
+                const isMobile = window.innerWidth <= 768;
+                if (!isMobile) {
+                    // Desktop: Position near star
+                    const starRect = star.getBoundingClientRect();
+                    const offsetX = 20;
+                    const offsetY = -10;
+        
+                    let left = starRect.right + offsetX;
+                    let top = starRect.top + offsetY;
+        
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    const popupWidth = popup.offsetWidth || 300;
+                    const popupHeight = popup.offsetHeight || 200;
+        
+                    if (left + popupWidth > viewportWidth) {
+                        left = starRect.left - popupWidth - offsetX;
+                    }
+                    if (top < 0) {
+                        top = starRect.bottom;
+                    }
+                    if (top + popupHeight > viewportHeight) {
+                        top = viewportHeight - popupHeight - 10;
+                    }
+        
+                    popup.style.left = left + 'px';
+                    popup.style.top = top + 'px';
+                    popup.classList.add('positioned');
+                } // On mobile, do nothing—CSS will center it
+        
+                popup.classList.add('active');
             }
         }
 
