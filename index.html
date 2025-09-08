@@ -207,11 +207,12 @@
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); /* Ensures centering without rotation influence */
+            transform: translate(-50%, -50%) rotate(0deg); /* Explicitly set to 0deg to override any inheritance */
+            transform-style: flat; /* Prevents 3D transform inheritance from parent */
             background: var(--dark-card);
             border: 1px solid var(--dark-border);
             border-radius: 15px;
-            padding: 0; /* Remove padding from .popup to avoid affecting wrapper */
+            padding: 1.5rem;
             z-index: 4;
             max-width: 400px;
             width: 90%;
@@ -225,11 +226,11 @@
         .popup-content {
             position: relative;
             color: var(--text-light);
-            padding: 1.5rem; /* Move padding here for inner content */
         }
         
         .popup-wrapper {
-            transform: rotate(-15deg); /* Counter-rotates to keep content upright; match your menu's rotate(15deg) */
+            /* Remove rotate(-15deg) - no longer needed with isolation */
+            /* If you have other styles here, keep them; otherwise, this class can be empty */
         }
         
         .popup-content h3 {
@@ -252,7 +253,6 @@
             color: var(--teal);
             cursor: pointer;
             transition: color 0.3s ease;
-            z-index: 5; /* Ensures close button stays on top */
         }
         
         .popup-close:hover {
