@@ -195,64 +195,69 @@
         }
 
         /* Position stars to form Cassiopeia's "W" shape, scaled to container */
-        #shedar { top: 10%; left: 10%; }
-        #caph { top: 10%; left: 90%; }
-        #gamma-cas { top: 50%; left: 50%; }
-        #ruchbah { top: 90%; left: 20%; }
-        #segin { top: 90%; left: 80%; }
+        #shedar { top: 15%; left: 15%; } 
+        #caph { top: 15%; left: 85%; }
+        #gamma-cas { top: 50%; left: 50%; } 
+        #ruchbah { top: 85%; left: 25%; } 
+        #segin { top: 85%; left: 75%; } 
 
-       /* Pop-up Styles */
-        .popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(0deg); /* Explicitly set to 0deg to override any inheritance */
-            transform-style: flat; /* Prevents 3D transform inheritance from parent */
-            background: var(--dark-card);
-            border: 1px solid var(--dark-border);
-            border-radius: 15px;
-            padding: 1.5rem;
-            z-index: 4;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .popup.active {
-            display: block;
-        }
-        
-        .popup-content {
-            position: relative;
-            color: var(--text-light);
-        }
-        
-        .popup-content h3 {
-            color: var(--teal);
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-        
-        .popup-content p {
-            color: var(--text-muted);
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-        
-        .popup-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 1.5rem;
-            color: var(--teal);
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-        
-        .popup-close:hover {
-            color: var(--teal-dark);
-        }
+      /* Pop-up Styles */
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(0deg); /* Explicitly set to 0deg to override any inheritance */
+    transform-style: flat; /* Prevents 3D transform inheritance from parent */
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
+    border-radius: 15px;
+    padding: 1.5rem;
+    z-index: 4;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.popup.active {
+    display: block;
+}
+
+.popup-content {
+    position: relative;
+    color: var(--text-light);
+}
+
+.popup-wrapper {
+    /* Remove rotate(-15deg) - no longer needed with isolation */
+    /* If you have other styles here, keep them; otherwise, this class can be empty */
+}
+
+.popup-content h3 {
+    color: var(--teal);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.popup-content p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    color: var(--teal);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.popup-close:hover {
+    color: var(--teal-dark);
+}
 
         /* Whitelist Page */
         .content-section {
@@ -399,11 +404,11 @@
                 transform: none; /* Remove vertical centering */
             }
 
-            #shedar { top: 10%; left: 20%; }
-            #caph { top: 10%; left: 80%; }
+            #shedar { top: 15%; left: 25%; } 
+            #caph { top: 15%; left: 75%; } 
             #gamma-cas { top: 50%; left: 50%; }
-            #ruchbah { top: 90%; left: 30%; }
-            #segin { top: 90%; left: 70%; }
+            #ruchbah { top: 85%; left: 35%; } 
+            #segin { top: 85%; left: 65%; } 
 
             .star {
                 width: 12px;
@@ -742,37 +747,59 @@
         }
 
         // Cassiopeia Menu Functionality
-        document.querySelectorAll('.star').forEach(star => {
-            star.addEventListener('click', () => {
-                // Hide all pop-ups
-                document.querySelectorAll('.popup').forEach(popup => {
-                    popup.classList.remove('active');
-                });
-
-                // Show the clicked star's pop-up
-                const popupId = star.getAttribute('data-popup');
-                const popup = document.getElementById(popupId);
-                if (popup) {
-                    popup.classList.add('active');
+        function showPopup(popupId) {
+            // Hide all pop-ups first
+            document.querySelectorAll('.popup').forEach(popup => {
+                popup.classList.remove('active');
+                // Move back to menu if it's currently in body
+                const menu = document.querySelector('.cassiopeia-menu');
+                if (popup.parentNode !== menu) {
+                    menu.appendChild(popup);
                 }
             });
-        });
-
-        // Close pop-up when clicking the close button
-        document.querySelectorAll('.popup-close').forEach(closeBtn => {
-            closeBtn.addEventListener('click', () => {
-                closeBtn.closest('.popup').classList.remove('active');
+        
+            const popup = document.getElementById(popupId);
+            if (popup) {
+                // Move to body for isolation from rotation
+                document.body.appendChild(popup);
+                popup.classList.add('active');
+            }
+        }
+        
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', () => {
+                const popupId = star.getAttribute('data-popup');
+                showPopup(popupId);
             });
         });
-
-        // Close pop-up when clicking outside
+        
+        // Close pop-up when clicking the close button
+        document.querySelectorAll('.popup-close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent bubbling
+                const popup = closeBtn.closest('.popup');
+                popup.classList.remove('active');
+                // Move back to menu
+                const menu = document.querySelector('.cassiopeia-menu');
+                menu.appendChild(popup);
+            });
+        });
+        
+        // Close pop-up when clicking outside (updated to handle body isolation)
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.star') && !e.target.closest('.popup')) {
                 document.querySelectorAll('.popup').forEach(popup => {
-                    popup.classList.remove('active');
+                    if (popup.classList.contains('active')) {
+                        popup.classList.remove('active');
+                        // Move back to menu
+                        const menu = document.querySelector('.cassiopeia-menu');
+                        menu.appendChild(popup);
+                    }
                 });
             }
         });
+
+// Your existing whitelist click-outside listener remains unchanged...
 
         // Handle clicks outside whitelist form to return to home page
         document.addEventListener('click', (e) => {
