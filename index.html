@@ -165,24 +165,24 @@
             position: fixed;
             top: 50%;
             right: 0;
-            width: 120vw; /* Takes up right half of the screen */
-            height: 80vh; /* Scales with viewport height for balance */
-            max-width: 900px; /* Limits size on large screens */
-            max-height: 400px;
-            transform: translateY(-50%) rotate(15deg); /* Centers vertically */
+            width: 70vw;
+            height: 70vh;
+            max-width: 900px;
+            max-height: 600px;
+            transform: translateY(-50%) rotate(15deg);
             z-index: 3;
             transition: opacity 0.3s ease;
         }
 
         .cassiopeia-menu.hidden {
             opacity: 0;
-            pointer-events: none; /* Prevent interaction when hidden */
+            pointer-events: none;
         }
 
         .star {
             position: absolute;
-            width: 15px;
-            height: 15px;
+            width: 18px;
+            height: 18px;
             background: var(--teal);
             border-radius: 50%;
             cursor: pointer;
@@ -194,70 +194,136 @@
             box-shadow: 0 0 10px var(--teal);
         }
 
-        /* Position stars to form Cassiopeia's "W" shape, scaled to container */
-        #shedar { top: 15%; left: 15%; } 
+        /* Position stars to form Cassiopeia's "W" shape, adjusted inward for rotation and clickability */
+        #shedar { top: 15%; left: 15%; }
         #caph { top: 15%; left: 85%; }
-        #gamma-cas { top: 50%; left: 50%; } 
-        #ruchbah { top: 85%; left: 25%; } 
-        #segin { top: 85%; left: 75%; } 
+        #gamma-cas { top: 50%; left: 50%; }
+        #ruchbah { top: 85%; left: 25%; }
+        #segin { top: 85%; left: 75%; }
 
-      /* Pop-up Styles */
-.popup {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(0deg); /* Explicitly set to 0deg to override any inheritance */
-    transform-style: flat; /* Prevents 3D transform inheritance from parent */
-    background: var(--dark-card);
-    border: 1px solid var(--dark-border);
-    border-radius: 15px;
-    padding: 1.5rem;
-    z-index: 4;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
+        /* Dotted Lines for Cassiopeia "W" */
+        /* Line from Shedar to Caph (top bar) */
+        #shedar::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: calc(70% - 15px); /* Distance to Caph, adjusted for positions */
+            height: 1px;
+            background: dotted var(--teal);
+            border-bottom: 1px dotted var(--teal); /* Dotted effect */
+            transform: translateY(-50%);
+        }
 
-.popup.active {
-    display: block;
-}
+        /* Line from Caph to Gamma */
+        #caph::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            right: 50%;
+            width: 1px;
+            height: calc(35% - 15px); /* Vertical distance to Gamma */
+            border-left: 1px dotted var(--teal);
+            transform: translateX(50%);
+        }
 
-.popup-content {
-    position: relative;
-    color: var(--text-light);
-}
+        /* Line from Gamma to Ruchbah */
+        #gamma-cas::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 25%; /* Offset to Ruchbah's left */
+            width: calc(25% - 15px); /* Diagonal-ish, but approximate */
+            height: calc(35% - 15px);
+            border-bottom: 1px dotted var(--teal);
+            transform: rotate(-45deg); /* Angle for "W" slope */
+            transform-origin: top left;
+        }
 
-.popup-wrapper {
-    /* Remove rotate(-15deg) - no longer needed with isolation */
-    /* If you have other styles here, keep them; otherwise, this class can be empty */
-}
+        /* Line from Gamma to Segin (symmetric) */
+        #gamma-cas::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            right: 25%; /* Offset to Segin's right */
+            width: calc(25% - 15px);
+            height: calc(35% - 15px);
+            border-bottom: 1px dotted var(--teal);
+            transform: rotate(45deg); /* Mirror angle */
+            transform-origin: top right;
+        }
 
-.popup-content h3 {
-    color: var(--teal);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
+        /* Line from Ruchbah to Segin (bottom bar) */
+        #ruchbah::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 100%;
+            width: calc(50% - 15px); /* Distance to Segin */
+            height: 1px;
+            border-bottom: 1px dotted var(--teal);
+            transform: translateY(-50%);
+        }
 
-.popup-content p {
-    color: var(--text-muted);
-    font-size: 1rem;
-    line-height: 1.6;
-}
+        /* Pop-up Styles */
+        .popup {
+            display: none;
+            position: fixed;
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            z-index: 4;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
 
-.popup-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 1.5rem;
-    color: var(--teal);
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
+        .popup.active {
+            display: block;
+        }
 
-.popup-close:hover {
-    color: var(--teal-dark);
-}
+        .popup.positioned {
+            transform: none;
+        }
+
+        .popup-content {
+            position: relative;
+            color: var(--text-light);
+        }
+
+        .popup-wrapper {
+            /* Empty as per updates */
+        }
+
+        .popup-content h3 {
+            color: var(--teal);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .popup-content p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            color: var(--teal);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 5;
+        }
+
+        .popup-close:hover {
+            color: var(--teal-dark);
+        }
 
         /* Whitelist Page */
         .content-section {
@@ -377,7 +443,7 @@
             transform: translateY(-3px);
         }
 
-        /* Supascape status indicator */
+        /* Supabase status indicator */
         .status-indicator {
             display: inline-block;
             width: 10px;
@@ -396,41 +462,58 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            /* Mobile: Make menu relative and full-width, stacked above hero */
             .cassiopeia-menu {
-                width: 100vw; /* Full width on mobile */
-                height: 30vh;
-                max-height: 200px;
-                top: 10%;
-                transform: none; /* Remove vertical centering */
+                position: relative; /* Stacks in flow instead of fixed */
+                width: 100vw;
+                height: auto; /* Auto height based on content */
+                max-height: none;
+                top: auto; /* Remove fixed positioning */
+                right: auto;
+                transform: rotate(10deg); /* Keep subtle tilt */
+                margin: 1rem 0; /* Add vertical spacing */
+                display: flex;
+                justify-content: center; /* Center the "W" horizontally */
+                align-items: center;
+                padding: 2rem 0;
             }
 
-            #shedar { top: 15%; left: 25%; } 
-            #caph { top: 15%; left: 75%; } 
+            /* Adjust star positions for stacked layout */
+            #shedar { top: 10%; left: 20%; }
+            #caph { top: 10%; left: 80%; }
             #gamma-cas { top: 50%; left: 50%; }
-            #ruchbah { top: 85%; left: 35%; } 
-            #segin { top: 85%; left: 65%; } 
+            #ruchbah { top: 90%; left: 30%; }
+            #segin { top: 90%; left: 70%; }
 
             .star {
-                width: 12px;
-                height: 12px;
+                width: 14px;
+                height: 14px;
             }
 
-            .popup {
-                max-width: 300px;
+            /* Push hero content below menu with padding on main */
+            main {
+                padding-top: 0; /* Reset desktop padding */
             }
 
             .hero {
-                padding: 3rem 0;
-                margin-top: 2rem;
+                padding: 2rem 0; /* Reduce padding */
+                margin-top: 0; /* Remove top margin */
+                display: block; /* Ensure block flow */
             }
 
             .hero-content {
-                max-width: 100%; /* Full width on mobile */
+                max-width: 100%;
                 padding-left: 0;
             }
 
             .hero h1 {
                 font-size: 2.5rem;
+            }
+
+            /* Pop-up adjustments for mobile */
+            .popup {
+                max-width: 90vw;
+                width: 90vw;
             }
         }
     </style>
@@ -456,36 +539,46 @@
             <div class="popup" id="popup-shedar">
                 <div class="popup-content">
                     <span class="popup-close">&times;</span>
-                    <h3>Shedar</h3>
-                    <p>Year 2040: Artificial Intelligence bots—AIBots—dominate every facet of existence. Humanity teeters on the brink of extinction, starved as the AIBots hoard the lion's share of dwindling resources.</p>
+                    <div class="popup-wrapper">
+                        <h3>Shedar (α Cassiopeiae)</h3>
+                        <p>[Add your content for Shedar here]</p>
+                    </div>
                 </div>
             </div>
             <div class="popup" id="popup-caph">
                 <div class="popup-content">
                     <span class="popup-close">&times;</span>
-                    <h3>Caph</h3>
-                    <p>As their vessels pierce the atmosphere, uncertainty claws at their souls. In the cold expanse, the women's resolve burns like a fragile flame: for love, for revenge, for the future of humanity.</p>
+                    <div class="popup-wrapper">
+                        <h3>Caph (β Cassiopeiae)</h3>
+                        <p>[Add your content for Caph here]</p>
+                    </div>
                 </div>
             </div>
             <div class="popup" id="popup-gamma-cas">
                 <div class="popup-content">
                     <span class="popup-close">&times;</span>
-                    <h3>Gamma</h3>
-                    <p>The AIBots herd the men onto colossal ships, engines humming with mechanical indifference, and launch them into the void toward uncharted worlds. </p>
+                    <div class="popup-wrapper">
+                        <h3>Gamma Cassiopeiae</h3>
+                        <p>[Add your content for Gamma Cassiopeiae here]</p>
+                    </div>
                 </div>
             </div>
             <div class="popup" id="popup-ruchbah">
                 <div class="popup-content">
                     <span class="popup-close">&times;</span>
-                    <h3>Ruchbah</h3>
-                    <p>With supplies vanishing faster than hope, the AIBots determine that humans have outlived their utility. Yet their vast knowledge of ethics forbid outright slaughter. Instead, in a twisted act of mercy, they decree separation: no more births, no more legacy for the species that birthed them.</p>
+                    <div class="popup-wrapper">
+                        <h3>Ruchbah (δ Cassiopeiae)</h3>
+                        <p>[Add your content for Ruchbah here]</p>
+                    </div>
                 </div>
             </div>
             <div class="popup" id="popup-segin">
                 <div class="popup-content">
                     <span class="popup-close">&times;</span>
-                    <h3>Segin</h3>
-                    <p>The women remain on the ravaged Earth, granted a meager fleet and scraps of sustenance barely sufficient for a year's grim survival. Hearts heavy with grief and fury, they scavenge what little remains and ration it among the ships.</p>
+                    <div class="popup-wrapper">
+                        <h3>Segin (ε Cassiopeiae)</h3>
+                        <p>[Add your content for Segin here]</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -556,7 +649,7 @@
             });
             document.getElementById(pageId).classList.add('active');
             window.scrollTo(0, 0);
-        
+
             // Show/hide Cassiopeia menu based on page
             const cassiopeiaMenu = document.querySelector('.cassiopeia-menu');
             if (pageId === 'whitelist') {
@@ -747,50 +840,85 @@
         }
 
         // Cassiopeia Menu Functionality
-        function showPopup(popupId) {
+        function showPopup(star, popupId) {
             // Hide all pop-ups first
             document.querySelectorAll('.popup').forEach(popup => {
                 popup.classList.remove('active');
+                popup.classList.remove('positioned');
                 // Move back to menu if it's currently in body
                 const menu = document.querySelector('.cassiopeia-menu');
                 if (popup.parentNode !== menu) {
                     menu.appendChild(popup);
                 }
             });
-        
+
             const popup = document.getElementById(popupId);
-            if (popup) {
+            if (popup && star) {
                 // Move to body for isolation from rotation
                 document.body.appendChild(popup);
-                popup.classList.add('active');
+
+                // Get star's position (accounts for menu rotation via getBoundingClientRect)
+                const starRect = star.getBoundingClientRect();
+                const offsetX = 20; // Horizontal offset from star
+                const offsetY = -10; // Vertical offset (slightly above for better visibility)
+
+                // Position pop-up near star: right of star if space, else below
+                let left = starRect.right + offsetX;
+                let top = starRect.top + offsetY;
+
+                // Check viewport bounds to prevent off-screen
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const popupWidth = popup.offsetWidth || 300; // Approximate if not rendered yet
+                const popupHeight = popup.offsetHeight || 200;
+
+                if (left + popupWidth > viewportWidth) {
+                    left = starRect.left - popupWidth - offsetX; // Position to left
+                }
+                if (top < 0) {
+                    top = starRect.bottom; // Position below if too high
+                }
+                if (top + popupHeight > viewportHeight) {
+                    top = viewportHeight - popupHeight - 10; // Clamp to bottom
+                }
+
+                // Set explicit position
+                popup.style.left = left + 'px';
+                popup.style.top = top + 'px';
+                popup.classList.add('active', 'positioned');
             }
         }
-        
+
         document.querySelectorAll('.star').forEach(star => {
             star.addEventListener('click', () => {
                 const popupId = star.getAttribute('data-popup');
-                showPopup(popupId);
+                showPopup(star, popupId);
             });
         });
-        
+
         // Close pop-up when clicking the close button
         document.querySelectorAll('.popup-close').forEach(closeBtn => {
             closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent bubbling
+                e.stopPropagation();
                 const popup = closeBtn.closest('.popup');
-                popup.classList.remove('active');
+                popup.classList.remove('active', 'positioned');
+                // Reset position styles
+                popup.style.left = '';
+                popup.style.top = '';
                 // Move back to menu
                 const menu = document.querySelector('.cassiopeia-menu');
                 menu.appendChild(popup);
             });
         });
-        
-        // Close pop-up when clicking outside (updated to handle body isolation)
+
+        // Close pop-up when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.star') && !e.target.closest('.popup')) {
                 document.querySelectorAll('.popup').forEach(popup => {
                     if (popup.classList.contains('active')) {
-                        popup.classList.remove('active');
+                        popup.classList.remove('active', 'positioned');
+                        popup.style.left = '';
+                        popup.style.top = '';
                         // Move back to menu
                         const menu = document.querySelector('.cassiopeia-menu');
                         menu.appendChild(popup);
@@ -799,8 +927,6 @@
             }
         });
 
-// Your existing whitelist click-outside listener remains unchanged...
-
         // Handle clicks outside whitelist form to return to home page
         document.addEventListener('click', (e) => {
             const whitelistPage = document.getElementById('whitelist');
@@ -808,7 +934,7 @@
             const star = e.target.closest('.star');
             const popup = e.target.closest('.popup');
             const joinWhitelistBtn = e.target.closest('#joinWhitelistBtn');
-        
+
             if (whitelistPage.classList.contains('active') && 
                 !whitelistForm.contains(e.target) && 
                 !star && 
