@@ -201,44 +201,49 @@
         #ruchbah { top: 90%; left: 20%; }
         #segin { top: 90%; left: 80%; }
 
-        /* Pop-up Styles */
+       /* Pop-up Styles */
         .popup {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%); /* Ensures centering without rotation influence */
             background: var(--dark-card);
             border: 1px solid var(--dark-border);
             border-radius: 15px;
-            padding: 1.5rem;
+            padding: 0; /* Remove padding from .popup to avoid affecting wrapper */
             z-index: 4;
             max-width: 400px;
             width: 90%;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
-
+        
         .popup.active {
             display: block;
         }
-
+        
         .popup-content {
             position: relative;
             color: var(--text-light);
+            padding: 1.5rem; /* Move padding here for inner content */
         }
-
+        
+        .popup-wrapper {
+            transform: rotate(-15deg); /* Counter-rotates to keep content upright; match your menu's rotate(15deg) */
+        }
+        
         .popup-content h3 {
             color: var(--teal);
             margin-bottom: 1rem;
             font-size: 1.5rem;
         }
-
+        
         .popup-content p {
             color: var(--text-muted);
             font-size: 1rem;
             line-height: 1.6;
         }
-
+        
         .popup-close {
             position: absolute;
             top: 10px;
@@ -247,8 +252,9 @@
             color: var(--teal);
             cursor: pointer;
             transition: color 0.3s ease;
+            z-index: 5; /* Ensures close button stays on top */
         }
-
+        
         .popup-close:hover {
             color: var(--teal-dark);
         }
@@ -472,7 +478,7 @@
                 <div class="popup-content">
                     <span class="popup-close">&times;</span>
                     <h3>Ruchbah</h3>
-                    <p>With supplies vanishing faster than hope, the AIBots determine that humans have outlived their utility. Yet, their vast knowledge of ethics forbid outright slaughter. Instead, in a twisted act of mercy, they decree separation: no more births, no more legacy for the species that birthed them.</p>
+                    <p>With supplies vanishing faster than hope, the AIBots determine that humans have outlived their utility. Yet their vast knowledge of ethics forbid outright slaughter. Instead, in a twisted act of mercy, they decree separation: no more births, no more legacy for the species that birthed them.</p>
                 </div>
             </div>
             <div class="popup" id="popup-segin">
