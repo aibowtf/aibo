@@ -179,7 +179,7 @@
             pointer-events: none;
         }
 
-       .star {
+        .star {
             position: absolute;
             width: 18px;
             height: 18px;
@@ -188,72 +188,78 @@
             cursor: pointer;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        
+
         .star:hover {
             transform: scale(1.5);
             box-shadow: 0 0 10px var(--teal);
         }
-        
+
         /* Position stars to form Cassiopeia's "W" shape, adjusted inward for rotation and clickability */
         #shedar { top: 15%; left: 15%; }
         #caph { top: 15%; left: 85%; }
         #gamma-cas { top: 50%; left: 50%; }
         #ruchbah { top: 85%; left: 25%; }
         #segin { top: 85%; left: 75%; }
-        
-        /* Dotted Lines for Cassiopeia "W" - Corrected for visibility and precision */
+
+        /* Dotted Lines for Cassiopeia "W" */
+        /* Line from Shedar to Caph (top bar) */
         #shedar::after {
             content: '';
             position: absolute;
             top: 50%;
             left: 100%;
-            width: calc(70% - 3px); /* Adjusted for exact distance between Shedar (15%) and Caph (85%) */
+            width: calc(70% - 15px); /* Distance to Caph, adjusted for positions */
             height: 1px;
-            border-bottom: 1px dotted var(--teal); /* Dotted line - no invalid background */
+            background: dotted var(--teal);
+            border-bottom: 1px dotted var(--teal); /* Dotted effect */
             transform: translateY(-50%);
         }
-        
+
+        /* Line from Caph to Gamma */
         #caph::after {
             content: '';
             position: absolute;
             bottom: 100%;
-            left: 50%;
+            right: 50%;
             width: 1px;
-            height: calc(35% - 9px); /* Adjusted for vertical distance from Caph (15%) to Gamma (50%) */
+            height: calc(35% - 15px); /* Vertical distance to Gamma */
             border-left: 1px dotted var(--teal);
-            transform: translateX(-50%);
+            transform: translateX(50%);
         }
-        
+
+        /* Line from Gamma to Ruchbah */
         #gamma-cas::after {
             content: '';
             position: absolute;
             bottom: 100%;
-            left: 25%; /* Offset to align with Ruchbah's left (25%) */
-            width: calc(15% - 3px); /* Horizontal span for diagonal */
-            height: calc(35% - 9px); /* Vertical span for diagonal */
+            left: 25%; /* Offset to Ruchbah's left */
+            width: calc(25% - 15px); /* Diagonal-ish, but approximate */
+            height: calc(35% - 15px);
             border-bottom: 1px dotted var(--teal);
-            transform: rotate(-45deg); /* Angle for left diagonal of "W" */
+            transform: rotate(-45deg); /* Angle for "W" slope */
             transform-origin: top left;
         }
-        
+
+        /* Line from Gamma to Segin (symmetric) */
         #gamma-cas::before {
             content: '';
             position: absolute;
             bottom: 100%;
-            right: 25%; /* Offset to align with Segin's right (75%) */
-            width: calc(25% - 3px); /* Horizontal span for right diagonal */
-            height: calc(35% - 9px); /* Vertical span for diagonal */
+            right: 25%; /* Offset to Segin's right */
+            width: calc(25% - 15px);
+            height: calc(35% - 15px);
             border-bottom: 1px dotted var(--teal);
-            transform: rotate(45deg); /* Angle for right diagonal of "W" */
+            transform: rotate(45deg); /* Mirror angle */
             transform-origin: top right;
         }
-        
+
+        /* Line from Ruchbah to Segin (bottom bar) */
         #ruchbah::after {
             content: '';
             position: absolute;
             top: 100%;
             left: 100%;
-            width: calc(50% - 6px); /* Adjusted for distance between Ruchbah (25%) and Segin (75%) */
+            width: calc(50% - 15px); /* Distance to Segin */
             height: 1px;
             border-bottom: 1px dotted var(--teal);
             transform: translateY(-50%);
@@ -482,30 +488,6 @@
             .star {
                 width: 14px;
                 height: 14px;
-            }
-
-            #shedar::after {
-                width: calc(60% - 3px); /* Slightly reduced for mobile spacing */
-            }
-        
-            #caph::after {
-                height: calc(40% - 9px); /* Adjusted for mobile auto-height */
-            }
-        
-            #gamma-cas::after {
-                width: calc(20% - 3px);
-                height: calc(40% - 9px);
-                left: 30%; /* Align with mobile Ruchbah (30%) */
-            }
-        
-            #gamma-cas::before {
-                width: calc(20% - 3px);
-                height: calc(40% - 9px);
-                right: 30%; /* Align with mobile Segin (70%) */
-            }
-        
-            #ruchbah::after {
-                width: calc(40% - 6px); /* Adjusted for mobile */
             }
         
             /* Push hero content (AIbo + Join Whitelist) below menu and shift down */
