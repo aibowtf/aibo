@@ -201,67 +201,77 @@
         #ruchbah { top: 85%; left: 25%; }
         #segin { top: 85%; left: 75%; }
 
-        /* Dotted Lines for Cassiopeia "W" */
-        /* Line from Shedar to Caph (top bar) */
+       /* Dotted Lines for Cassiopeia "W" */
+        .cassiopeia-menu::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none; /* Allow clicks to pass through to stars */
+        }
+        
+        /* Line from Shedar to Caph (top of W) */
         #shedar::after {
             content: '';
             position: absolute;
             top: 50%;
             left: 100%;
-            width: calc(70% - 15px); /* Distance to Caph, adjusted for positions */
+            width: calc(70% - 18px);
             height: 1px;
-            background: dotted var(--teal);
-            border-bottom: 1px dotted var(--teal); /* Dotted effect */
+            border-bottom: 2px dotted var(--teal);
             transform: translateY(-50%);
         }
-
-        /* Line from Caph to Gamma */
+        
+        /* Line from Caph to Gamma Cas (first diagonal down) */
         #caph::after {
             content: '';
             position: absolute;
-            bottom: 100%;
-            right: 50%;
-            width: 1px;
-            height: calc(35% - 15px); /* Vertical distance to Gamma */
-            border-left: 1px dotted var(--teal);
-            transform: translateX(50%);
+            top: 100%;
+            left: 50%;
+            width: calc(35% - 18px);
+            height: calc(35% - 18px);
+            border-bottom: 2px dotted var(--teal);
+            transform: rotate(-30deg);
+            transform-origin: top left;
         }
-
-        /* Line from Gamma to Ruchbah */
+        
+        /* Line from Gamma Cas to Ruchbah (second diagonal down) */
         #gamma-cas::after {
             content: '';
             position: absolute;
-            bottom: 100%;
-            left: 25%; /* Offset to Ruchbah's left */
-            width: calc(25% - 15px); /* Diagonal-ish, but approximate */
-            height: calc(35% - 15px);
-            border-bottom: 1px dotted var(--teal);
-            transform: rotate(-45deg); /* Angle for "W" slope */
+            top: 100%;
+            left: 50%;
+            width: calc(25% - 18px);
+            height: calc(35% - 18px);
+            border-bottom: 2px dotted var(--teal);
+            transform: rotate(-150deg);
             transform-origin: top left;
         }
-
-        /* Line from Gamma to Segin (symmetric) */
+        
+        /* Line from Gamma Cas to Segin (second diagonal up) */
         #gamma-cas::before {
             content: '';
             position: absolute;
-            bottom: 100%;
-            right: 25%; /* Offset to Segin's right */
-            width: calc(25% - 15px);
-            height: calc(35% - 15px);
-            border-bottom: 1px dotted var(--teal);
-            transform: rotate(45deg); /* Mirror angle */
+            top: 100%;
+            right: 50%;
+            width: calc(25% - 18px);
+            height: calc(35% - 18px);
+            border-bottom: 2px dotted var(--teal);
+            transform: rotate(150deg);
             transform-origin: top right;
         }
-
-        /* Line from Ruchbah to Segin (bottom bar) */
+        
+        /* Line from Ruchbah to Segin (bottom of W) */
         #ruchbah::after {
             content: '';
             position: absolute;
-            top: 100%;
+            top: 50%;
             left: 100%;
-            width: calc(50% - 15px); /* Distance to Segin */
+            width: calc(50% - 18px);
             height: 1px;
-            border-bottom: 1px dotted var(--teal);
+            border-bottom: 2px dotted var(--teal);
             transform: translateY(-50%);
         }
 
