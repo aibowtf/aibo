@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIbo - Cassiopeia Menu with Dotted Lines</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Doto Font Implementation */
@@ -125,14 +126,14 @@
             position: relative;
             z-index: 2;
             display: flex;
-            justify-content: flex-start; /* Align content to the left */
+            justify-content: flex-start;
             align-items: center;
         }
 
         .hero-content {
-            max-width: 50%; /* Limits content to left half */
-            text-align: center; /* Centers text within the left half */
-            padding-left: 20px; /* Adds spacing from the left edge */
+            max-width: 50%;
+            text-align: center;
+            padding-left: 20px;
         }
 
         .hero h1 {
@@ -195,14 +196,14 @@
             box-shadow: 0 0 10px var(--teal);
         }
 
-        /* Position stars to form Cassiopeia's "W" shape, adjusted inward for rotation and clickability */
+        /* Position stars to form Cassiopeia's "W" shape */
         #shedar { top: 15%; left: 15%; }
         #caph { top: 15%; left: 85%; }
         #gamma-cas { top: 50%; left: 50%; }
         #ruchbah { top: 85%; left: 25%; }
         #segin { top: 85%; left: 75%; }
 
-        /* Dotted Lines for Cassiopeia "W" - FIXED VERSION */
+        /* FIXED Dotted Lines for Cassiopeia "W" */
         .cassiopeia-menu::before {
             content: '';
             position: absolute;
@@ -221,10 +222,14 @@
             top: 50%;
             left: 100%;
             width: calc(70% - 18px);
-            height: 1px;
-            background-image: linear-gradient(to right, var(--teal) 40%, transparent 40%);
-            background-size: 6px 2px;
-            background-repeat: repeat-x;
+            height: 2px;
+            background: repeating-linear-gradient(
+                to right,
+                var(--teal) 0,
+                var(--teal) 4px,
+                transparent 4px,
+                transparent 8px
+            );
             transform: translateY(-50%);
         }
 
@@ -236,9 +241,13 @@
             left: 50%;
             width: calc(35% - 18px);
             height: calc(35% - 18px);
-            background-image: linear-gradient(to right, var(--teal) 40%, transparent 40%);
-            background-size: 6px 2px;
-            background-repeat: repeat-x;
+            background: repeating-linear-gradient(
+                to right,
+                var(--teal) 0,
+                var(--teal) 4px,
+                transparent 4px,
+                transparent 8px
+            );
             transform: rotate(-30deg);
             transform-origin: top left;
         }
@@ -251,9 +260,13 @@
             left: 50%;
             width: calc(25% - 18px);
             height: calc(35% - 18px);
-            background-image: linear-gradient(to right, var(--teal) 40%, transparent 40%);
-            background-size: 6px 2px;
-            background-repeat: repeat-x;
+            background: repeating-linear-gradient(
+                to right,
+                var(--teal) 0,
+                var(--teal) 4px,
+                transparent 4px,
+                transparent 8px
+            );
             transform: rotate(-150deg);
             transform-origin: top left;
         }
@@ -266,9 +279,13 @@
             right: 50%;
             width: calc(25% - 18px);
             height: calc(35% - 18px);
-            background-image: linear-gradient(to right, var(--teal) 40%, transparent 40%);
-            background-size: 6px 2px;
-            background-repeat: repeat-x;
+            background: repeating-linear-gradient(
+                to right,
+                var(--teal) 0,
+                var(--teal) 4px,
+                transparent 4px,
+                transparent 8px
+            );
             transform: rotate(150deg);
             transform-origin: top right;
         }
@@ -280,10 +297,14 @@
             top: 50%;
             left: 100%;
             width: calc(50% - 18px);
-            height: 1px;
-            background-image: linear-gradient(to right, var(--teal) 40%, transparent 40%);
-            background-size: 6px 2px;
-            background-repeat: repeat-x;
+            height: 2px;
+            background: repeating-linear-gradient(
+                to right,
+                var(--teal) 0,
+                var(--teal) 4px,
+                transparent 4px,
+                transparent 8px
+            );
             transform: translateY(-50%);
         }
 
@@ -486,16 +507,16 @@
         @media (max-width: 768px) {
             /* Mobile: Make menu relative and full-width, stacked above hero, shifted down */
             .cassiopeia-menu {
-                position: relative; /* Stacks in flow instead of fixed */
+                position: relative;
                 width: 100vw;
-                height: auto; /* Auto height based on content */
+                height: auto;
                 max-height: none;
-                top: auto; /* Remove fixed positioning */
+                top: auto;
                 right: auto;
-                transform: rotate(10deg); /* Keep subtle tilt */
-                margin: 2rem 0 1rem 0; /* Increased top margin to shift down, bottom for spacing */
+                transform: rotate(10deg);
+                margin: 2rem 0 1rem 0;
                 display: flex;
-                justify-content: center; /* Center the "W" horizontally */
+                justify-content: center;
                 align-items: center;
                 padding: 2rem 0;
             }
@@ -514,13 +535,13 @@
         
             /* Push hero content (AIbo + Join Whitelist) below menu and shift down */
             main {
-                padding-top: 0; /* Reset desktop padding */
+                padding-top: 0;
             }
         
             .hero {
-                padding: 2rem 0; /* Reduce padding */
-                margin-top: 2rem; /* Shift hero down for additional spacing */
-                display: block; /* Ensure block flow */
+                padding: 2rem 0;
+                margin-top: 2rem;
+                display: block;
             }
         
             .hero-content {
@@ -549,30 +570,25 @@
             /* Adjust dotted lines for mobile */
             #shedar::after {
                 width: calc(60% - 14px);
-                background-size: 4px 1px;
             }
 
             #caph::after {
                 width: calc(30% - 14px);
                 height: calc(30% - 14px);
-                background-size: 4px 1px;
             }
 
             #gamma-cas::after {
                 width: calc(20% - 14px);
                 height: calc(30% - 14px);
-                background-size: 4px 1px;
             }
 
             #gamma-cas::before {
                 width: calc(20% - 14px);
                 height: calc(30% - 14px);
-                background-size: 4px 1px;
             }
 
             #ruchbah::after {
                 width: calc(40% - 14px);
-                background-size: 4px 1px;
             }
         }
     </style>
@@ -712,10 +728,10 @@
             // Show/hide Cassiopeia menu based on page
             const cassiopeiaMenu = document.querySelector('.cassiopeia-menu');
             if (pageId === 'whitelist') {
-                cassiopeiaMenu.classList.add('hidden'); // Hide menu on whitelist page
+                cassiopeiaMenu.classList.add('hidden');
                 getSubmissionCount();
             } else {
-                cassiopeiaMenu.classList.remove('hidden'); // Show menu on home page
+                cassiopeiaMenu.classList.remove('hidden');
             }
         }
 
@@ -880,7 +896,7 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Submit';
             }
-        });
+        }
 
         // Subscribe to real-time changes
         function subscribeToWhitelistChanges() {
@@ -898,7 +914,7 @@
             setInterval(getSubmissionCount, 30000);
         }
 
-      // Cassiopeia Menu Functionality
+        // Cassiopeia Menu Functionality
         function showPopup(star, popupId) {
             // Hide all pop-ups first
             document.querySelectorAll('.popup').forEach(popup => {
@@ -915,23 +931,21 @@
             if (popup && star) {
                 // Move to body for isolation from rotation
                 document.body.appendChild(popup);
-                popup.classList.add('active'); // Add active to make it visible for measurement
+                popup.classList.add('active');
         
                 // Check if mobile (for centered pop-ups via CSS)
                 const isMobile = window.innerWidth <= 768;
                 if (isMobile) {
-                    // On mobile, CSS handles centering—no JS positioning needed
                     return;
                 }
         
-                // Desktop: Position near star (use requestAnimationFrame for accurate dimensions after render)
+                // Desktop: Position near star
                 requestAnimationFrame(() => {
                     const starRect = star.getBoundingClientRect();
-                    const edgeMargin = 10; // Minimum pixels from screen edge
-                    const offsetX = 25; // Increased horizontal offset for more clearance
-                    const offsetY = -15; // Slight upward offset, adjusted for tilt
+                    const edgeMargin = 10;
+                    const offsetX = 25;
+                    const offsetY = -15;
         
-                    // Get actual popup dimensions now that it's visible
                     const popupRect = popup.getBoundingClientRect();
                     const popupWidth = popupRect.width;
                     const popupHeight = popupRect.height;
@@ -939,18 +953,15 @@
                     const viewportWidth = window.innerWidth;
                     const viewportHeight = window.innerHeight;
         
-                    // Preferred: Right of star
                     let left = starRect.right + offsetX;
-                    let top = (starRect.top + starRect.bottom) / 2 - popupHeight / 2 + offsetY; // Center vertically on star
+                    let top = (starRect.top + starRect.bottom) / 2 - popupHeight / 2 + offsetY;
         
                     let isValidPosition = true;
         
                     // Check right cutoff
                     if (left + popupWidth > viewportWidth - edgeMargin) {
-                        // Fallback: Left of star
                         left = starRect.left - popupWidth - offsetX;
                         if (left < edgeMargin) {
-                            // If left also cuts off, center horizontally
                             left = (viewportWidth - popupWidth) / 2;
                             isValidPosition = false;
                         }
@@ -966,9 +977,9 @@
         
                     // Vertical fallback if too close to star or edges
                     if (Math.abs(top - starRect.top) < 20 || !isValidPosition) {
-                        top = starRect.bottom + offsetY; // Below star if above is too close
+                        top = starRect.bottom + offsetY;
                         if (top + popupHeight > viewportHeight - edgeMargin) {
-                            top = (viewportHeight - popupHeight) / 2; // Center vertically as last resort
+                            top = (viewportHeight - popupHeight) / 2;
                         }
                     }
         
@@ -996,10 +1007,8 @@
                 e.stopPropagation();
                 const popup = closeBtn.closest('.popup');
                 popup.classList.remove('active', 'positioned');
-                // Reset position styles
                 popup.style.left = '';
                 popup.style.top = '';
-                // Move back to menu
                 const menu = document.querySelector('.cassiopeia-menu');
                 menu.appendChild(popup);
             });
@@ -1013,13 +1022,13 @@
                         popup.classList.remove('active', 'positioned');
                         popup.style.left = '';
                         popup.style.top = '';
-                        // Move back to menu
                         const menu = document.querySelector('.cassiopeia-menu');
                         menu.appendChild(popup);
                     }
                 });
             }
         });
+
         // Handle clicks outside whitelist form to return to home page
         document.addEventListener('click', (e) => {
             const whitelistPage = document.getElementById('whitelist');
@@ -1033,7 +1042,7 @@
                 !star && 
                 !popup && 
                 !joinWhitelistBtn) {
-                navigateTo('home'); // This will also show the Cassiopeia menu
+                navigateTo('home');
             }
         });
 
