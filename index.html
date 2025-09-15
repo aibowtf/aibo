@@ -951,6 +951,18 @@
             setInterval(getSubmissionCount, 30000);
         }
 
+        function startProductRefresher() {
+            // Only fetch if on merch page to avoid unnecessary API calls
+            if (document.getElementById('merch').classList.contains('active')) {
+                fetchProducts();
+            }
+            setInterval(() => {
+                if (document.getElementById('merch').classList.contains('active')) {
+                    fetchProducts();
+                }
+            }, 300000); // Refresh every 5 minutes (300,000 ms)
+        }
+
       // Cassiopeia Menu Functionality
         function showPopup(star, popupId) {
             // Hide all pop-ups first
@@ -1073,6 +1085,7 @@
                 });
             }
         });
+        
         // Handle clicks outside whitelist form to return to home page
         document.addEventListener('click', (e) => {
             const whitelistPage = document.getElementById('whitelist');
@@ -1095,6 +1108,7 @@
             navigateTo('home');
             startCountRefresher();
             subscribeToWhitelistChanges();
+            startProductRefresher();
         });
 
         // Cart state
@@ -1134,70 +1148,87 @@
         }
                 
         // Render products
-        function renderProducts(products) {
-          const shopContainer = document.getElementById('shop');
-          shopContainer.innerHTML = ''; // Clear loading state
-          if (!products.length) {
-            shopContainer.innerHTML = '<p>No products to display.</p>';
-            return;
-          }
-          products.forEach(product => {
-            fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/printful-proxy', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-              },
-              body: JSON.stringify({ endpoint: `store/products/${product.id}`, method: 'GET' }),
-            })
-              .then(res => {
-                if (!res.ok) {
-                  throw new Error(`HTTP error! Status: ${res.status}, Message: ${res.statusText}`);
-                }
-                return res.json();
-              })
-              .then(data => {
-                console.log(`Product ${product.id} response:`, data); // Log product details
-                // Fix: Extract sync_variants directly from data or data.result
-                const variants = data.sync_variants || data.result?.sync_variants || [];
-                console.log(`Variants for ${product.id}:`, variants); // Log extracted variants for debugging
-                if (!variants.length) {
-                  console.warn(`No variants for product ${product.id}`);
-                  return;
-                }
-                const div = document.createElement('div');
-                div.className = 'product-card';
-                div.innerHTML = `
-                  <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
-                  <h3>${product.name}</h3>
-                  <p>$${variants[0].retail_price || '25.00'}</p>
-                  <select id="variant-${product.id}">
-                    ${variants.map(v => `<option value="${v.id}" data-price="${v.retail_price || '25.00'}">${v.name} ($${v.retail_price || '25.00'})</option>`).join('')}
-                  </select>
-                  <button onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${variants[0].id}, ${variants[0].retail_price || '25.00'})">Add to Cart</button>
-                `;
-                shopContainer.appendChild(div);
-              })
-              .catch(error => {
-                console.error(`Error fetching product ${product.id}:`, error);
-                // Optionally render a basic card without variants
-                const div = document.createElement('div');
-                div.className = 'product-card';
-                div.innerHTML = `
-                  <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
-                  <h3>${product.name}</h3>
-                  <p>Price: N/A (Error loading details)</p>
-                  <button disabled>Error loading variants</button>
-                `;
-                shopContainer.appendChild(div);
-              });
-          });
+       function renderProducts(products) {
+            const shopContainer = document.getElementById('shop');
+            shopContainer.innerHTML = ''; // Clear loading state
+            if (!products.length) {
+                shopContainer.innerHTML = '<p>No products to display.</p>';
+                return;
+            }
+            products.forEach(product => {
+                fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/printful-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    },
+                    body: JSON.stringify({ endpoint: `store/products/${product.id}`, method: 'GET' }),
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                        return res.json();
+                    })
+                    .then(data => {
+                        console.log(`Product ${product.id} response:`, data);
+                        const variants = data.sync_variants || data.result?.sync_variants || [];
+                        if (!variants.length) {
+                            console.warn(`No variants for product ${product.id}`);
+                            return;
+                        }
+                        const div = document.createElement('div');
+                        div.className = 'product-card';
+                        div.dataset.productId = product.id; // Add for easier updates
+                        const firstAvailableVariant = variants.find(v => v.in_stock) || variants[0];
+                        div.innerHTML = `
+                            <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
+                            <h3>${product.name}</h3>
+                            <p>$${firstAvailableVariant.retail_price || '25.00'} ${firstAvailableVariant.in_stock ? '' : '(Out of Stock)'}</p>
+                            <select id="variant-${product.id}">
+                                ${variants.map(v => `<option value="${v.id}" data-price="${v.retail_price || '25.00'}" ${!v.in_stock ? 'disabled' : ''}>${v.name} ($${v.retail_price || '25.00'}) ${v.in_stock ? '' : '(Out of Stock)'}</option>`).join('')}
+                            </select>
+                            <button ${firstAvailableVariant.in_stock ? '' : 'disabled'} onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${firstAvailableVariant.id}, ${firstAvailableVariant.retail_price || '25.00'})">Add to Cart</button>
+                        `;
+                        shopContainer.appendChild(div);
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching product ${product.id}:`, error);
+                        const div = document.createElement('div');
+                        div.className = 'product-card';
+                        div.innerHTML = `
+                            <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
+                            <h3>${product.name}</h3>
+                            <p>Price: N/A (Error loading details)</p>
+                            <button disabled>Error loading variants</button>
+                        `;
+                        shopContainer.appendChild(div);
+                    });
+            });
         }
         
         // Add to cart
-        function addToCart(productId, productName, variantId, price) {
-          cart.push({ product_id: productId, product_name: productName, variant_id: variantId, quantity: 1, price });
-          updateCart();
+       async function addToCart(productId, productName, variantId, price) {
+            try {
+                const response = await fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/printful-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    },
+                    body: JSON.stringify({ endpoint: `store/variants/${variantId}`, method: 'GET' }),
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                const variant = data.result || data;
+                if (!variant.in_stock) {
+                    showMessage(`${productName} (variant ${variant.name}) is out of stock`, 'error');
+                    return;
+                }
+                cart.push({ product_id: productId, product_name: productName, variant_id: variantId, quantity: 1, price });
+                updateCart();
+            } catch (error) {
+                console.error('Error validating stock:', error);
+                showMessage(`Failed to add ${productName} to cart: ${error.message}`, 'error');
+            }
         }
         
         // Update cart UI
