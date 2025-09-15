@@ -1170,24 +1170,26 @@
                         return res.json();
                     })
                     .then(data => {
-                        console.log(`Product ${product.id} response:`, data);
+                        console.log(`Product ${product.id} full response:`, data); // Log full response
                         const variants = data.sync_variants || data.result?.sync_variants || [];
+                        console.log(`Variants for ${product.id}:`, variants); // Log variants
                         if (!variants.length) {
                             console.warn(`No variants for product ${product.id}`);
                             return;
                         }
+                        variants.forEach(v => console.log(`Variant ${v.id}: in_stock=${v.in_stock}`)); // Log in_stock
                         const div = document.createElement('div');
                         div.className = 'product-card';
-                        div.dataset.productId = product.id; // Add for easier updates
-                        const firstAvailableVariant = variants.find(v => v.in_stock) || variants[0];
+                        div.dataset.productId = product.id;
+                        const firstAvailableVariant = variants.find(v => v.in_stock === true) || variants[0];
                         div.innerHTML = `
                             <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
                             <h3>${product.name}</h3>
-                            <p>$${firstAvailableVariant.retail_price || '25.00'} ${firstAvailableVariant.in_stock ? '' : '(Out of Stock)'}</p>
+                            <p>$${firstAvailableVariant.retail_price || '25.00'} ${firstAvailableVariant.in_stock === true ? '' : '(Out of Stock)'}</p>
                             <select id="variant-${product.id}">
-                                ${variants.map(v => `<option value="${v.id}" data-price="${v.retail_price || '25.00'}" ${!v.in_stock ? 'disabled' : ''}>${v.name} ($${v.retail_price || '25.00'}) ${v.in_stock ? '' : '(Out of Stock)'}</option>`).join('')}
+                                ${variants.map(v => `<option value="${v.id}" data-price="${v.retail_price || '25.00'}" ${v.in_stock !== true ? 'disabled' : ''}>${v.name} ($${v.retail_price || '25.00'}) ${v.in_stock !== true ? '(Out of Stock)' : ''}</option>`).join('')}
                             </select>
-                            <button ${firstAvailableVariant.in_stock ? '' : 'disabled'} onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${firstAvailableVariant.id}, ${firstAvailableVariant.retail_price || '25.00'})">Add to Cart</button>
+                            <button ${firstAvailableVariant.in_stock === true ? '' : 'disabled'} onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${firstAvailableVariant.id}, ${firstAvailableVariant.retail_price || '25.00'})">Add to Cart</button>
                         `;
                         shopContainer.appendChild(div);
                     })
