@@ -623,6 +623,22 @@
                     </form>
                 </div>
             </section>
+
+            <!-- Merch Page -->
+            <section id="merch" class="page">
+                <div class="content-section">
+                    <h2>AIbo Merch</h2>
+                    <p>Browse our exclusive t-shirts and hoodies!</p>
+                    <div id="shop" class="shop-container">
+                        <!-- Products will be dynamically inserted here -->
+                    </div>
+                    <div id="cart-section">
+                        <h3>Cart (<span id="cart-count">0</span>)</h3>
+                        <ul id="cart-items"></ul>
+                        <button id="checkout-btn" class="submit-btn" disabled>Checkout</button>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -635,7 +651,7 @@
                 <a href="https://github.com/aibowtf"><i class="fab fa-github"></i></a>
                 <a href="https://drip.trade/"><i class="fas fa-droplet"></i></a>
                 <a href="https://img_aibowtf.arweave.net"><i class="fas fa-hard-drive"></i></a>
-                <a href="MERCH_PAGE"><i class="fas fa-shirt"></i></a>
+                <a href="#merch" onclick="navigateTo('merch')"><i class="fas fa-shirt"></i></a>
             </div>
         </div>
     </footer>
