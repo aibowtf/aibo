@@ -1149,7 +1149,7 @@
         }
                 
         // Render products
-      function renderProducts(products) {
+         function renderProducts(products) {
             const shopContainer = document.getElementById('shop');
             shopContainer.innerHTML = ''; // Clear loading state
             if (!products.length) {
@@ -1171,7 +1171,9 @@
                     })
                     .then(data => {
                         console.log(`Product ${product.id} full response:`, data); // Debug
-                        const variants = data.result?.sync_variants || [];
+                        // Access sync_variants from result
+                        const productData = data.result || data; // Handle both response formats
+                        const variants = productData.sync_variants || [];
                         console.log(`Variants for ${product.id}:`, variants); // Debug
                         if (!variants.length) {
                             console.warn(`No variants for product ${product.id}`);
@@ -1222,7 +1224,7 @@
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                 const data = await response.json();
                 console.log(`Variant ${variantId} response:`, data); // Debug
-                const variant = data.result || data;
+                const variant = data.result || data; // Handle both response formats
                 if (variant.in_stock !== true) {
                     showMessage(`${productName} (variant ${variant.name}) is out of stock`, 'error');
                     return;
