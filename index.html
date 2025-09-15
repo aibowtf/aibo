@@ -1097,72 +1097,72 @@
         });
 
         // Cart state
-let cart = [];
-
-// Fetch products from Printful via Supabase
-async function fetchProducts() {
-  try {
-    const response = await fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/printful-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint: 'store/products', method: 'GET' }),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}, Message: ${await response.text()}`);
-    }
-    const products = await response.json();
-    const tshirts = products.filter(p => p.name.toLowerCase().includes('t-shirt') || p.name.toLowerCase().includes('hoodie'));
-    renderProducts(tshirts);
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    showMessage(`Failed to load merch: ${error.message}`, 'error');
-  }
-}
-
-// Render products
-function renderProducts(products) {
-  const shopContainer = document.getElementById('shop');
-  shopContainer.innerHTML = '';
-  products.forEach(product => {
-    fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/printful-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint: `store/products/${product.id}`, method: 'GET' }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        const variants = data.sync_variants;
-        const div = document.createElement('div');
-        div.className = 'product-card';
-        div.innerHTML = `
-          <img src="${product.thumbnail_url}" alt="${product.name}">
-          <h3>${product.name}</h3>
-          <p>$${variants[0].retail_price || '25.00'}</p>
-          <select id="variant-${product.id}">
-            ${variants.map(v => `<option value="${v.id}" data-price="${v.retail_price}">${v.name}</option>`).join('')}
-          </select>
-          <button onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${variants[0].id}, ${variants[0].retail_price})">Add to Cart</button>
-        `;
-        shopContainer.appendChild(div);
-      });
-  });
-}
-
-// Add to cart
-function addToCart(productId, productName, variantId, price) {
-  cart.push({ product_id: productId, product_name: productName, variant_id: variantId, quantity: 1, price });
-  updateCart();
-}
-
-// Update cart UI
-function updateCart() {
-  const cartCount = document.getElementById('cart-count');
-  const cartItems = document.getElementById('cart-items');
-  const checkoutBtn = document.getElementById('checkout-btn');
-  cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-  cartItems.innerHTML = cart.map(item => `<li>${item.product_name} - $${item.price} x ${item.quantity}</li>`).join('');
-  checkoutBtn.disabled = cart.length === 0;
-}
+        let cart = [];
+        
+        // Fetch products from Printful via Supabase
+        async function fetchProducts() {
+          try {
+            const response = await fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/printful-proxy', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ endpoint: 'store/products', method: 'GET' }),
+            });
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}, Message: ${await response.text()}`);
+            }
+            const products = await response.json();
+            const tshirts = products.filter(p => p.name.toLowerCase().includes('t-shirt') || p.name.toLowerCase().includes('hoodie'));
+            renderProducts(tshirts);
+          } catch (error) {
+            console.error('Error fetching products:', error);
+            showMessage(`Failed to load merch: ${error.message}`, 'error');
+          }
+        }
+        
+        // Render products
+        function renderProducts(products) {
+          const shopContainer = document.getElementById('shop');
+          shopContainer.innerHTML = '';
+          products.forEach(product => {
+            fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/printful-proxy', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ endpoint: `store/products/${product.id}`, method: 'GET' }),
+            })
+              .then(res => res.json())
+              .then(data => {
+                const variants = data.sync_variants;
+                const div = document.createElement('div');
+                div.className = 'product-card';
+                div.innerHTML = `
+                  <img src="${product.thumbnail_url}" alt="${product.name}">
+                  <h3>${product.name}</h3>
+                  <p>$${variants[0].retail_price || '25.00'}</p>
+                  <select id="variant-${product.id}">
+                    ${variants.map(v => `<option value="${v.id}" data-price="${v.retail_price}">${v.name}</option>`).join('')}
+                  </select>
+                  <button onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${variants[0].id}, ${variants[0].retail_price})">Add to Cart</button>
+                `;
+                shopContainer.appendChild(div);
+              });
+          });
+        }
+        
+        // Add to cart
+        function addToCart(productId, productName, variantId, price) {
+          cart.push({ product_id: productId, product_name: productName, variant_id: variantId, quantity: 1, price });
+          updateCart();
+        }
+        
+        // Update cart UI
+        function updateCart() {
+          const cartCount = document.getElementById('cart-count');
+          const cartItems = document.getElementById('cart-items');
+          const checkoutBtn = document.getElementById('checkout-btn');
+          cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+          cartItems.innerHTML = cart.map(item => `<li>${item.product_name} - $${item.price} x ${item.quantity}</li>`).join('');
+          checkoutBtn.disabled = cart.length === 0;
+        }
     </script>
 </body>
 </html>
