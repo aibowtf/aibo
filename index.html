@@ -1157,7 +1157,9 @@
               })
               .then(data => {
                 console.log(`Product ${product.id} response:`, data); // Log product details
-                const variants = (Array.isArray(data) ? data : data.result?.sync_variants) || [];
+                // Fix: Extract sync_variants directly from data or data.result
+                const variants = data.sync_variants || data.result?.sync_variants || [];
+                console.log(`Variants for ${product.id}:`, variants); // Log extracted variants for debugging
                 if (!variants.length) {
                   console.warn(`No variants for product ${product.id}`);
                   return;
@@ -1165,11 +1167,11 @@
                 const div = document.createElement('div');
                 div.className = 'product-card';
                 div.innerHTML = `
-                  <img src="${product.thumbnail_url}" alt="${product.name}">
+                  <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
                   <h3>${product.name}</h3>
                   <p>$${variants[0].retail_price || '25.00'}</p>
                   <select id="variant-${product.id}">
-                    ${variants.map(v => `<option value="${v.id}" data-price="${v.retail_price}">${v.name}</option>`).join('')}
+                    ${variants.map(v => `<option value="${v.id}" data-price="${v.retail_price || '25.00'}">${v.name} ($${v.retail_price || '25.00'})</option>`).join('')}
                   </select>
                   <button onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${variants[0].id}, ${variants[0].retail_price || '25.00'})">Add to Cart</button>
                 `;
@@ -1177,7 +1179,16 @@
               })
               .catch(error => {
                 console.error(`Error fetching product ${product.id}:`, error);
-                // Skip silently or add placeholder
+                // Optionally render a basic card without variants
+                const div = document.createElement('div');
+                div.className = 'product-card';
+                div.innerHTML = `
+                  <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
+                  <h3>${product.name}</h3>
+                  <p>Price: N/A (Error loading details)</p>
+                  <button disabled>Error loading variants</button>
+                `;
+                shopContainer.appendChild(div);
               });
           });
         }
