@@ -410,6 +410,89 @@
             color: var(--text-muted);
         }
 
+        /* Merch Page Styles */
+        .shop-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+        
+        .product-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-card img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .product-card h3 {
+            color: var(--teal);
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-card p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .product-card select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 1rem;
+            background: rgba(10, 10, 15, 0.5);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            color: var(--text-light);
+        }
+        
+        .product-card button {
+            background: rgba(0, 255, 208, 0.15);
+            color: var(--teal);
+            border: 1px solid var(--teal-dark);
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .product-card button:hover {
+            background: rgba(0, 255, 208, 0.25);
+        }
+        
+        #cart-section {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        #cart-items {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+        
+        #cart-items li {
+            color: var(--text-muted);
+            margin: 0.5rem 0;
+        }
+        
+        #checkout-btn {
+            width: 200px;
+            margin: 0 auto;
+        }
+        
         /* Footer Styles */
         footer {
             padding: 2rem 0;
@@ -628,7 +711,6 @@
             <section id="merch" class="page">
                 <div class="content-section">
                     <h2>AIbo Merch</h2>
-                    <p>Browse our exclusive t-shirts and hoodies!</p>
                     <div id="shop" class="shop-container">
                         <!-- Products will be dynamically inserted here -->
                     </div>
@@ -674,12 +756,14 @@
             });
             document.getElementById(pageId).classList.add('active');
             window.scrollTo(0, 0);
-
+        
             // Show/hide Cassiopeia menu based on page
             const cassiopeiaMenu = document.querySelector('.cassiopeia-menu');
-            if (pageId === 'whitelist') {
-                cassiopeiaMenu.classList.add('hidden'); // Hide menu on whitelist page
-                getSubmissionCount();
+            if (pageId === 'whitelist' || pageId === 'merch') {
+                cassiopeiaMenu.classList.add('hidden'); // Hide menu on whitelist or merch page
+                if (pageId === 'whitelist') {
+                    getSubmissionCount();
+                }
             } else {
                 cassiopeiaMenu.classList.remove('hidden'); // Show menu on home page
             }
