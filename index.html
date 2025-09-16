@@ -711,7 +711,7 @@
             <!-- Merch Page -->
             <section id="merch" class="page">
                 <div class="content-section">
-                    <h2>AIbo Merch</h2>
+                    <h2>Merch</h2>
                     <div id="shop" class="shop-container">
                         <!-- Products will be dynamically inserted here -->
                     </div>
@@ -1265,6 +1265,27 @@
                 showMessage(`Checkout failed: ${error.message}`, 'error');
             }
         }
+
+        // Handle success page after checkout
+        function handleCheckoutSuccess() {
+            const urlParams = new URLSearchParams(window.location.hash.replace('#', ''));
+            const sessionId = urlParams.get('session_id');
+            if (window.location.hash.startsWith('#success') && sessionId) {
+                navigateTo('merch'); // Redirect to merch page
+                showMessage('Order placed successfully! You’ll receive a confirmation soon.', 'success');
+                cart = []; // Clear cart
+                updateCart(); // Update UI
+            }
+        }
+        
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            navigateTo('home');
+            startCountRefresher();
+            subscribeToWhitelistChanges();
+            startProductRefresher();
+            handleCheckoutSuccess(); // Check for success redirect
+        });
         
         // Attach event listener to checkout button
         document.getElementById('checkout-btn').addEventListener('click', handleCheckout);
