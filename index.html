@@ -1309,58 +1309,50 @@
         
         // Handle checkout with Embedded Checkout
         async function handleCheckout() {
-            if (cart.length === 0) {
+            if (!cart.length) {
                 showMessage('Your cart is empty!', 'error');
                 return;
             }
+        
+            // Limit cart data to essential fields
+            const simplifiedCart = cart.map(item => ({
+                product_id: item.product_id,
+                variant_id: item.variant_id,
+                size: item.size,
+                quantity: item.quantity
+            }));
+        
+            // Validate cart size (rough estimate: 1 item ~100 bytes, limit to ~300 items to stay under 40KB)
+            const cartSize = JSON.stringify(simplifiedCart).length;
+            if (cartSize > 30000) { // Conservative limit to avoid 40KB cap
+                showMessage('Cart is too large! Please remove some items and try again.', 'error');
+                return;
+            }
+        
             try {
-                console.log('Sending cart to checkout:', cart);
+                showMessage('Processing checkout...', 'info');
                 const response = await fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/stripe-checkout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0`,
                     },
-                    body: JSON.stringify(cart),
+                    body: JSON.stringify({ cart: simplifiedCart }),
                 });
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
-                }
+        
                 const data = await response.json();
-                console.log('Checkout response:', data);
                 if (data.error) {
                     throw new Error(data.error);
                 }
-                if (!data.clientSecret) {
-                    throw new Error('No client secret returned from server');
-                }
         
-                const checkout = await stripe.initEmbeddedCheckout({
-                    clientSecret: data.clientSecret,
-                });
-                checkoutInstance = checkout; // Store checkout instance
-                checkout.mount('#embedded-checkout');
-                document.getElementById('checkout-container').style.display = 'block';
-                document.getElementById('cart-section').style.display = 'none';
+                console.log('Checkout response:', data);
+                const stripe = Stripe('pk_test_51S7XRZ47ILvE0Nk7RkdXIaBiprRtwKaEZBS5w0aDrNqx0PPjsFXMn5ZKKYKIetYTImr6uXUIeI8w1MW5I9gliowy00UenGwDg2');
+                await stripe.redirectToCheckout({ sessionId: data.clientSecret });
             } catch (error) {
-                console.error('Error initiating checkout:', error);
+                console.error('Checkout error:', error);
                 showMessage(`Checkout failed: ${error.message}`, 'error');
-                document.getElementById('checkout-container').style.display = 'none';
-                document.getElementById('cart-section').style.display = 'block';
             }
         }
-        
-        async function handleCheckoutSuccess() {
-            const urlParams = new URLSearchParams(window.location.hash.replace('#', ''));
-            const sessionId = urlParams.get('session_id');
-            console.log('Checking for success redirect, sessionId:', sessionId, 'hash:', window.location.hash);
-            if (window.location.hash.startsWith('#success') && sessionId) {
-                console.log('Navigating to success page with sessionId:', sessionId);
-                navigateTo('success');
-                showMessage('Payment successful! You’ll receive a confirmation email soon.', 'success');
-                cart = [];
-                updateCart();
         
                 // Reset merch page UI
                 resetMerchPage();
