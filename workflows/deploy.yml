@@ -3,22 +3,19 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # Adjust to your default branch if different (e.g., master)
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install envsubst for replacing placeholders
       - name: Install envsubst
         run: sudo apt-get update && sudo apt-get install -y gettext-base
 
-      # Replace placeholders with secrets
       - name: Replace environment variables in index.html
         env:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -26,7 +23,6 @@ jobs:
         run: |
           envsubst < index.html > index.html.tmp && mv index.html.tmp index.html
 
-      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
