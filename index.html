@@ -1147,7 +1147,7 @@
             document.getElementById('shop').innerHTML = '<p>Error loading products.</p>';
           }
         }
-                
+
         // Render products
         function renderProducts(products) {
             const shopContainer = document.getElementById('shop');
@@ -1170,10 +1170,10 @@
                         return res.json();
                     })
                     .then(data => {
-                        console.log(`Product ${product.id} response:`, data); // Debug
-                        const productData = data.result || data; // Handle both response formats
+                        console.log(`Product ${product.id} response:`, data);
+                        const productData = data.result || data;
                         const variants = productData.sync_variants || [];
-                        console.log(`Variants for ${product.id}:`, variants); // Debug
+                        console.log(`Variants for ${product.id}:`, variants);
                         if (!variants.length) {
                             console.warn(`No variants for product ${product.id}`);
                             return;
@@ -1181,15 +1181,18 @@
                         const div = document.createElement('div');
                         div.className = 'product-card';
                         div.dataset.productId = product.id;
-                        const firstVariant = variants[0]; // Use first variant for display
+                        const firstVariant = variants[0];
                         div.innerHTML = `
                             <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
                             <h3>${product.name}</h3>
                             <p>$${firstVariant.retail_price || '25.00'}</p>
                             <select id="variant-${product.id}">
-                                ${variants.map(v => `<option value="${v.id}" data-price="${v.retail_price || '25.00'}">${v.name} ($${v.retail_price || '25.00'})</option>`).join('')}
+                                ${variants.map(v => {
+                                    const size = v.name.split(' - ').pop() || 'Unknown'; // Extract size from name
+                                    return `<option value="${v.id}" data-size="${size}" data-price="${v.retail_price || '25.00'}">${v.name} ($${v.retail_price || '25.00'})</option>`;
+                                }).join('')}
                             </select>
-                            <button onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${firstVariant.id}, ${firstVariant.retail_price || '25.00'})">Add to Cart</button>
+                            <button onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', 'variant-${product.id}')">Add to Cart</button>
                         `;
                         shopContainer.appendChild(div);
                     })
@@ -1207,21 +1210,32 @@
                     });
             });
         }
-        
+
         // Add to cart
-        function addToCart(productId, productName, variantId, price) {
-            cart.push({ product_id: productId, product_name: productName, variant_id: variantId, quantity: 1, price });
+        function addToCart(productId, productName, selectId) {
+            const select = document.getElementById(selectId);
+            const variantId = select.value;
+            const price = parseFloat(select.options[select.selectedIndex].dataset.price);
+            const size = select.options[select.selectedIndex].dataset.size; // Get size from data attribute
+            cart.push({
+                product_id: productId.toString(),
+                product_name: productName,
+                variant_id: variantId,
+                size: size, // Add size explicitly
+                quantity: 1,
+                price: price
+            });
             updateCart();
         }
         
         // Update cart UI
         function updateCart() {
-          const cartCount = document.getElementById('cart-count');
-          const cartItems = document.getElementById('cart-items');
-          const checkoutBtn = document.getElementById('checkout-btn');
-          cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-          cartItems.innerHTML = cart.map(item => `<li>${item.product_name} - $${item.price} x ${item.quantity}</li>`).join('');
-          checkoutBtn.disabled = cart.length === 0;
+            const cartCount = document.getElementById('cart-count');
+            const cartItems = document.getElementById('cart-items');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartItems.innerHTML = cart.map(item => `<li>${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}</li>`).join('');
+            checkoutBtn.disabled = cart.length === 0;
         }
 
         const STRIPE_PUBLISHABLE_KEY = 'pk_test_51S7XRZ47ILvE0Nk7RkdXIaBiprRtwKaEZBS5w0aDrNqx0PPjsFXMn5ZKKYKIetYTImr6uXUIeI8w1MW5I9gliowy00UenGwDg2'; // Replace with your Stripe publishable key
