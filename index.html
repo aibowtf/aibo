@@ -488,22 +488,6 @@
             color: var(--text-muted);
             margin: 0.5rem 0;
         }
-
-        .remove-btn {
-            background: rgba(247, 37, 133, 0.15); /* Pink to match error color */
-            color: #f72585;
-            border: 1px solid #f72585;
-            padding: 8px 15px; /* Smaller than submit-btn */
-            font-size: 0.9rem; /* Slightly smaller text */
-        }
-        .remove-btn:hover {
-            background: rgba(247, 37, 133, 0.25);
-            transform: translateY(-2px);
-        }
-        .remove-btn:active {
-            background: rgba(247, 37, 133, 0.3);
-            transform: translateY(0);
-        }
         
         #checkout-btn {
             width: 200px;
@@ -779,7 +763,6 @@
                     <div id="cart-section">
                         <h3>Cart (<span id="cart-count">0</span>)</h3>
                         <ul id="cart-items"></ul>
-                        <p id="cart-total">Total: $0.00</p>
                         <button id="checkout-btn" class="submit-btn" disabled>Checkout</button>
                     </div>
                     <!-- Embedded Checkout Container -->
@@ -794,10 +777,6 @@
                 <div class="content-section">
                     <h2>Payment Successful!</h2>
                     <p>Thank you for your purchase! You'll receive a confirmation email soon.</p>
-                    <div id="order-details">
-                        <h3>Order Confirmed</h3>
-                        <p>Thank you for your purchase! Check your email for order details and shipping information.</p>
-                    </div>
                     <button class="submit-btn" onclick="navigateTo('home')" style="margin-top: 1rem;">Return to Home</button>
                 </div>
             </section>
@@ -819,19 +798,19 @@
 
     <!-- Add Supabase CDN -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script>
-    // Initialize Supabase
+        <script>
+        // Initialize Supabase
         const SUPABASE_URL = 'https://cpmapqoeyahbsuyxsyfh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         const maxAddresses = 300;
-        
+    
         // Track fetch state to prevent overlapping calls
         let isFetchingProducts = false;
         let checkoutInstance = null; // Track Stripe checkout instance
-        
+    
         // Navigation functionality
         function navigateTo(pageId) {
             console.log('Navigating to:', pageId);
@@ -846,7 +825,7 @@
                 document.getElementById('home').classList.add('active');
             }
             window.scrollTo(0, 0);
-        
+    
             const cassiopeiaMenu = document.querySelector('.cassiopeia-menu');
             if (pageId === 'whitelist' || pageId === 'merch' || pageId === 'success') {
                 cassiopeiaMenu.classList.add('hidden');
@@ -862,7 +841,7 @@
                 cassiopeiaMenu.classList.remove('hidden');
             }
         }
-        
+    
         // Reset merch page UI
         function resetMerchPage() {
             console.log('Resetting merch page UI');
@@ -870,20 +849,29 @@
             const cartSection = document.getElementById('cart-section');
             const embeddedCheckout = document.getElementById('embedded-checkout');
             
+            // Hide checkout container and show cart section
             checkoutContainer.style.display = 'none';
             cartSection.style.display = 'block';
             
+            // Clear embedded checkout content
             embeddedCheckout.innerHTML = '';
             
+            // Destroy Stripe checkout instance if it exists
             if (checkoutInstance) {
                 console.log('Destroying Stripe checkout instance');
                 checkoutInstance.destroy();
                 checkoutInstance = null;
             }
             
+            // Ensure products are visible
             fetchProducts();
         }
-        
+    
+        // JOIN WHITELIST button functionality
+        document.getElementById('joinWhitelistBtn').addEventListener('click', function() {
+            navigateTo('whitelist');
+        });
+    
         // Show message to user
         function showMessage(message, type) {
             const messageDiv = document.getElementById('formMessage');
@@ -902,7 +890,7 @@
                 messageDiv.style.display = 'none';
             }, 5000);
         }
-        
+    
         // Get submission count from Supabase
         async function getSubmissionCount() {
             try {
@@ -943,7 +931,7 @@
                 return 0;
             }
         }
-        
+    
         // Check if address is already submitted
         async function isDuplicateAddress(address) {
             try {
@@ -962,7 +950,7 @@
                 return false;
             }
         }
-        
+    
         // Submit address to Supabase
         async function submitAddress(address) {
             try {
@@ -978,7 +966,209 @@
                 throw error;
             }
         }
+    
+        // Handle form submission
+        document.getElementById('whitelistForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const addressInput = document.getElementById('walletAddress');
+            const address = addressInput.value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (!address) {
+                showMessage('Please enter a wallet address', 'error');
+                return;
+            }
+            
+            if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+                showMessage('Please enter a valid wallet address (0x followed by 40 hexadecimal characters)', 'error');
+                return;
+            }
+            
+            const isDuplicate = await isDuplicateAddress(address);
+            if (isDuplicate) {
+                showMessage('This wallet address has already been submitted', 'error');
+                return;
+            }
+            
+            const count = await getSubmissionCount();
+            if (count >= maxAddresses) {
+                showMessage('Whitelist is full!', 'error');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Whitelist Full';
+                addressInput.disabled = true;
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                await submitAddress(address);
+                showMessage('Wallet address submitted successfully!', 'success');
+                addressInput.value = '';
+                await getSubmissionCount();
+            } catch (error) {
+                console.error('Submission error:', error);
+                showMessage('Error submitting address. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+        });
+    
+        // Subscribe to real-time changes
+        function subscribeToWhitelistChanges() {
+            supabase
+                .channel('whitelist-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'whitelist' }, () => {
+                    getSubmissionCount();
+                })
+                .subscribe();
+        }
+    
+        // Periodic refresh function
+        function startCountRefresher() {
+            getSubmissionCount();
+            setInterval(getSubmissionCount, 30000);
+        }
+    
+        function startProductRefresher() {
+            // Only fetch immediately if merch is active
+            if (document.getElementById('merch').classList.contains('active')) {
+                fetchProducts();
+            }
+            // Clear existing interval to prevent overlap
+            let refreshInterval = null;
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            refreshInterval = setInterval(() => {
+                if (document.getElementById('merch').classList.contains('active')) {
+                    fetchProducts();
+                }
+            }, 300000);
+        }
+    
+        // Cassiopeia Menu Functionality
+        function showPopup(star, popupId) {
+            document.querySelectorAll('.popup').forEach(popup => {
+                popup.classList.remove('active');
+                popup.classList.remove('positioned');
+                const menu = document.querySelector('.cassiopeia-menu');
+                if (popup.parentNode !== menu) {
+                    menu.appendChild(popup);
+                }
+            });
+            
+            const popup = document.getElementById(popupId);
+            if (popup && star) {
+                document.body.appendChild(popup);
+                popup.classList.add('active');
+            
+                const isMobile = window.innerWidth <= 768;
+                if (isMobile) {
+                    return;
+                }
+            
+                requestAnimationFrame(() => {
+                    const starRect = star.getBoundingClientRect();
+                    const edgeMargin = 10;
+                    const offsetX = 25;
+                    const offsetY = -15;
+            
+                    const popupRect = popup.getBoundingClientRect();
+                    const popupWidth = popupRect.width;
+                    const popupHeight = popupRect.height;
+            
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+            
+                    let left = starRect.right + offsetX;
+                    let top = (starRect.top + starRect.bottom) / 2 - popupHeight / 2 + offsetY;
+                    let isValidPosition = true;
+            
+                    if (left + popupWidth > viewportWidth - edgeMargin) {
+                        left = starRect.left - popupWidth - offsetX;
+                        if (left < edgeMargin) {
+                            left = (viewportWidth - popupWidth) / 2;
+                            isValidPosition = false;
+                        }
+                    }
+            
+                    if (top < edgeMargin) {
+                        top = edgeMargin;
+                    }
+                    if (top + popupHeight > viewportHeight - edgeMargin) {
+                        top = viewportHeight - popupHeight - edgeMargin;
+                    }
+            
+                    if (Math.abs(top - starRect.top) < 20 || !isValidPosition) {
+                        top = starRect.bottom + offsetY;
+                        if (top + popupHeight > viewportHeight - edgeMargin) {
+                            top = (viewportHeight - popupHeight) / 2;
+                        }
+                    }
+            
+                    left = Math.max(edgeMargin, Math.min(left, viewportWidth - popupWidth - edgeMargin));
+                    top = Math.max(edgeMargin, Math.min(top, viewportHeight - popupHeight - edgeMargin));
+            
+                    popup.style.left = left + 'px';
+                    popup.style.top = top + 'px';
+                    popup.classList.add('positioned');
+                });
+            }
+        }
         
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', () => {
+                const popupId = star.getAttribute('data-popup');
+                showPopup(star, popupId);
+            });
+        });
+        
+        document.querySelectorAll('.popup-close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const popup = closeBtn.closest('.popup');
+                popup.classList.remove('active', 'positioned');
+                popup.style.left = '';
+                popup.style.top = '';
+                const menu = document.querySelector('.cassiopeia-menu');
+                menu.appendChild(popup);
+            });
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.star') && !e.target.closest('.popup')) {
+                document.querySelectorAll('.popup').forEach(popup => {
+                    if (popup.classList.contains('active')) {
+                        popup.classList.remove('active', 'positioned');
+                        popup.style.left = '';
+                        popup.style.top = '';
+                        const menu = document.querySelector('.cassiopeia-menu');
+                        menu.appendChild(popup);
+                    }
+                });
+            }
+        });
+        
+        document.addEventListener('click', (e) => {
+            const whitelistPage = document.getElementById('whitelist');
+            const whitelistForm = document.querySelector('.whitelist-form');
+            const star = e.target.closest('.star');
+            const popup = e.target.closest('.popup');
+            const joinWhitelistBtn = e.target.closest('#joinWhitelistBtn');
+    
+            if (whitelistPage.classList.contains('active') && 
+                !whitelistForm.contains(e.target) && 
+                !star && 
+                !popup && 
+                !joinWhitelistBtn) {
+                navigateTo('home');
+            }
+        });
+    
         // Cart state
         let cart = [];
         
@@ -1022,11 +1212,11 @@
                 isFetchingProducts = false;
             }
         }
-        
+    
         // Render products
         function renderProducts(products) {
             const shopContainer = document.getElementById('shop');
-            shopContainer.innerHTML = '';
+            shopContainer.innerHTML = ''; // Clear container before rendering
             if (!products.length) {
                 shopContainer.innerHTML = '<p>No products to display.</p>';
                 return;
@@ -1086,7 +1276,7 @@
                     });
             });
         }
-        
+    
         // Add to cart
         function addToCart(productId, productName, selectId) {
             const select = document.getElementById(selectId);
@@ -1106,40 +1296,16 @@
         
         // Update cart UI
         function updateCart() {
-            const cartItems = document.getElementById('cart-items');
             const cartCount = document.getElementById('cart-count');
+            const cartItems = document.getElementById('cart-items');
             const checkoutBtn = document.getElementById('checkout-btn');
-            cartItems.innerHTML = '';
-        
-            if (!cart.length) {
-                cartItems.innerHTML = '<p>Your cart is empty.</p>';
-                cartCount.textContent = '0';
-                checkoutBtn.disabled = true;
-                return;
-            }
-        
-            const ul = document.createElement('ul');
-            ul.className = 'cart-items';
-            cart.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    ${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}
-                    <button class="submit-btn remove-btn" onclick="removeFromCart(${index})">Remove</button>
-                `;
-                ul.appendChild(li);
-            });
-        
-            cartItems.appendChild(ul);
-            cartCount.textContent = cart.length;
-            checkoutBtn.disabled = false;
-            document.getElementById('cart-total').textContent = `Total: $${cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}`;
+            cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartItems.innerHTML = cart.map(item => `<li>${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}</li>`).join('');
+            checkoutBtn.disabled = cart.length === 0;
         }
-        
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCart();
-            showMessage('Item removed from cart.', 'info');
-        }
+    
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_51S7XRZ47ILvE0Nk7RkdXIaBiprRtwKaEZBS5w0aDrNqx0PPjsFXMn5ZKKYKIetYTImr6uXUIeI8w1MW5I9gliowy00UenGwDg2';
+        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
         
         // Handle checkout with Embedded Checkout
         async function handleCheckout() {
@@ -1147,37 +1313,20 @@
                 showMessage('Your cart is empty!', 'error');
                 return;
             }
-        
-            const simplifiedCart = cart.map(item => ({
-                product_id: item.product_id,
-                variant_id: item.variant_id,
-                size: item.size,
-                quantity: item.quantity,
-                price: item.price
-            }));
-        
-            const cartSize = JSON.stringify(simplifiedCart).length;
-            if (cartSize > 30000) {
-                showMessage('Cart is too large! Please remove some items.', 'error');
-                return;
-            }
-        
             try {
-                console.log('Sending simplified cart to checkout:', simplifiedCart);
+                console.log('Sending cart to checkout:', cart);
                 const response = await fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/stripe-checkout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                     },
-                    body: JSON.stringify({ cart: simplifiedCart }),
+                    body: JSON.stringify(cart),
                 });
-        
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
                 }
-        
                 const data = await response.json();
                 console.log('Checkout response:', data);
                 if (data.error) {
@@ -1187,11 +1336,10 @@
                     throw new Error('No client secret returned from server');
                 }
         
-                const stripe = Stripe('pk_test_51S7XRZ47ILvE0Nk7RkdXIaBiprRtwKaEZBS5w0aDrNqx0PPjsFXMn5ZKKYKIetYTImr6uXUIeI8w1MW5I9gliowy00UenGwDg2');
                 const checkout = await stripe.initEmbeddedCheckout({
                     clientSecret: data.clientSecret,
                 });
-                checkoutInstance = checkout;
+                checkoutInstance = checkout; // Store checkout instance
                 checkout.mount('#embedded-checkout');
                 document.getElementById('checkout-container').style.display = 'block';
                 document.getElementById('cart-section').style.display = 'none';
@@ -1203,7 +1351,6 @@
             }
         }
         
-        // Handle checkout success
         async function handleCheckoutSuccess() {
             const urlParams = new URLSearchParams(window.location.hash.replace('#', ''));
             const sessionId = urlParams.get('session_id');
@@ -1211,20 +1358,52 @@
             if (window.location.hash.startsWith('#success') && sessionId) {
                 console.log('Navigating to success page with sessionId:', sessionId);
                 navigateTo('success');
-                showMessage('Payment successful! You’ll receive a confirmation email with order details soon.', 'success');
+                showMessage('Payment successful! You’ll receive a confirmation email soon.', 'success');
                 cart = [];
                 updateCart();
+        
+                // Reset merch page UI
                 resetMerchPage();
-                document.getElementById('order-details').innerHTML = `
-                    <h3>Order Confirmed</h3>
-                    <p>Thank you for your purchase! Check your email for order details and shipping information.</p>
-                `;
+        
+                // Delay to ensure webhook populates orders table
+                await new Promise(resolve => setTimeout(resolve, 2000));
+        
+                try {
+                    console.log('Fetching order details for sessionId:', sessionId);
+                    const { data, error } = await supabase
+                        .from('orders')
+                        .select('cart, shipping_address, printful_order_id')
+                        .eq('stripe_session_id', sessionId)
+                        .single();
+        
+                    if (error || !data) {
+                        console.error('Error fetching order:', error);
+                        document.getElementById('order-details').innerHTML = '<p>Unable to load order details. Please contact support.</p>';
+                        return;
+                    }
+        
+                    console.log('Order data:', data);
+                    const orderDetails = document.getElementById('order-details');
+                    const cartItems = data.cart || [];
+                    orderDetails.innerHTML = `
+                        <h3>Order Details</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            ${cartItems.map(item => `<li>${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}</li>`).join('')}
+                        </ul>
+                        <p><strong>Shipping Address:</strong> ${data.shipping_address.name || 'N/A'}, ${data.shipping_address.line1}, ${data.shipping_address.city}, ${data.shipping_address.state || ''} ${data.shipping_address.postal_code}, ${data.shipping_address.country}</p>
+                        <p><strong>Order Number:</strong> ${data.printful_order_id || 'Pending'}</p>
+                    `;
+                } catch (error) {
+                    console.error('Error fetching order details:', error);
+                    document.getElementById('order-details').innerHTML = '<p>Unable to load order details. Please contact support.</p>';
+                }
             }
         }
-        
+    
         // Consolidated DOMContentLoaded listener
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, checking initial URL:', window.location.href);
+            // Parse hash carefully to handle query parameters
             let initialPage = window.location.hash.replace('#', '').split('?')[0] || 'home';
             if (!['home', 'whitelist', 'merch', 'success'].includes(initialPage)) {
                 initialPage = 'home';
@@ -1233,122 +1412,16 @@
             startCountRefresher();
             subscribeToWhitelistChanges();
             startProductRefresher();
-            handleCheckoutSuccess();
-        
-            // Event listeners
-            document.getElementById('joinWhitelistBtn').addEventListener('click', function() {
-                navigateTo('whitelist');
+            handleCheckoutSuccess(); // Check for success redirect on load
+            document.getElementById('checkout-btn').addEventListener('click', handleCheckout);
+    
+            // Add hashchange listener for dynamic navigation
+            window.addEventListener('hashchange', () => {
+                console.log('Hash changed:', window.location.hash);
+                const pageId = window.location.hash.replace('#', '').split('?')[0] || 'home';
+                navigateTo(pageId);
+                handleCheckoutSuccess();
             });
-        
-            document.getElementById('whitelistForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const addressInput = document.getElementById('walletAddress');
-                const address = addressInput.value.trim();
-                const submitBtn = document.getElementById('submitBtn');
-                
-                if (!address) {
-                    showMessage('Please enter a wallet address', 'error');
-                    return;
-                }
-                
-                if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
-                    showMessage('Please enter a valid wallet address (0x followed by 40 hexadecimal characters)', 'error');
-                    return;
-                }
-                
-                const isDuplicate = await isDuplicateAddress(address);
-                if (isDuplicate) {
-                    showMessage('This wallet address has already been submitted', 'error');
-                    return;
-                }
-                
-                const count = await getSubmissionCount();
-                if (count >= maxAddresses) {
-                    showMessage('Whitelist is full!', 'error');
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Whitelist Full';
-                    addressInput.disabled = true;
-                    return;
-                }
-                
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Submitting...';
-                
-                try {
-                    await submitAddress(address);
-                    showMessage('Wallet address submitted successfully!', 'success');
-                    addressInput.value = '';
-                    await getSubmissionCount();
-                } catch (error) {
-                    console.error('Submission error:', error);
-                    showMessage('Error submitting address. Please try again.', 'error');
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Submit';
-                }
-            });
-        
-            document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', () => {
-                    const popupId = star.getAttribute('data-popup');
-                    showPopup(star, popupId);
-                });
-            });
-        
-            document.querySelectorAll('.popup-close').forEach(closeBtn => {
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const popup = closeBtn.closest('.popup');
-                    popup.classList.remove('active', 'positioned');
-                    popup.style.left = '';
-                    popup.style.top = '';
-                    const menu = document.querySelector('.cassiopeia-menu');
-                    menu.appendChild(popup);
-                });
-            });
-        
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.star') && !e.target.closest('.popup')) {
-                    document.querySelectorAll('.popup').forEach(popup => {
-                        if (popup.classList.contains('active')) {
-                            popup.classList.remove('active', 'positioned');
-                            popup.style.left = '';
-                            popup.style.top = '';
-                            const menu = document.querySelector('.cassiopeia-menu');
-                            menu.appendChild(popup);
-                        }
-                    });
-                }
-            });
-        
-            document.addEventListener('click', (e) => {
-                const whitelistPage = document.getElementById('whitelist');
-                const whitelistForm = document.querySelector('.whitelist-form');
-                const star = e.target.closest('.star');
-                const popup = e.target.closest('.popup');
-                const joinWhitelistBtn = e.target.closest('#joinWhitelistBtn');
-        
-                if (whitelistPage.classList.contains('active') && 
-                    !whitelistForm.contains(e.target) && 
-                    !star && 
-                    !popup && 
-                    !joinWhitelistBtn) {
-                    navigateTo('home');
-                }
-            });
-        
-            const checkoutBtn = document.getElementById('checkout-btn');
-            checkoutBtn.removeEventListener('click', handleCheckout);
-            checkoutBtn.addEventListener('click', handleCheckout);
-        });
-        
-        // Add hashchange listener for dynamic navigation
-        window.addEventListener('hashchange', () => {
-            console.log('Hash changed:', window.location.hash);
-            const pageId = window.location.hash.replace('#', '').split('?')[0] || 'home';
-            navigateTo(pageId);
-            handleCheckoutSuccess();
         });
     </script>
 </body>
