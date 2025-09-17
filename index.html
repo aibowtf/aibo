@@ -798,7 +798,7 @@
 
     <!-- Add Supabase CDN -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script>
+        <script>
         // Initialize Supabase
         const SUPABASE_URL = 'https://cpmapqoeyahbsuyxsyfh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
@@ -809,6 +809,7 @@
     
         // Track fetch state to prevent overlapping calls
         let isFetchingProducts = false;
+        let checkoutInstance = null; // Track Stripe checkout instance
     
         // Navigation functionality
         function navigateTo(pageId) {
@@ -831,6 +832,7 @@
                 if (pageId === 'whitelist') {
                     getSubmissionCount();
                 } else if (pageId === 'merch') {
+                    resetMerchPage();
                     fetchProducts();
                 } else if (pageId === 'success') {
                     handleCheckoutSuccess();
@@ -838,6 +840,31 @@
             } else {
                 cassiopeiaMenu.classList.remove('hidden');
             }
+        }
+    
+        // Reset merch page UI
+        function resetMerchPage() {
+            console.log('Resetting merch page UI');
+            const checkoutContainer = document.getElementById('checkout-container');
+            const cartSection = document.getElementById('cart-section');
+            const embeddedCheckout = document.getElementById('embedded-checkout');
+            
+            // Hide checkout container and show cart section
+            checkoutContainer.style.display = 'none';
+            cartSection.style.display = 'block';
+            
+            // Clear embedded checkout content
+            embeddedCheckout.innerHTML = '';
+            
+            // Destroy Stripe checkout instance if it exists
+            if (checkoutInstance) {
+                console.log('Destroying Stripe checkout instance');
+                checkoutInstance.destroy();
+                checkoutInstance = null;
+            }
+            
+            // Ensure products are visible
+            fetchProducts();
         }
     
         // JOIN WHITELIST button functionality
@@ -1312,6 +1339,7 @@
                 const checkout = await stripe.initEmbeddedCheckout({
                     clientSecret: data.clientSecret,
                 });
+                checkoutInstance = checkout; // Store checkout instance
                 checkout.mount('#embedded-checkout');
                 document.getElementById('checkout-container').style.display = 'block';
                 document.getElementById('cart-section').style.display = 'none';
@@ -1333,6 +1361,9 @@
                 showMessage('Payment successful! You’ll receive a confirmation email soon.', 'success');
                 cart = [];
                 updateCart();
+        
+                // Reset merch page UI
+                resetMerchPage();
         
                 // Delay to ensure webhook populates orders table
                 await new Promise(resolve => setTimeout(resolve, 2000));
