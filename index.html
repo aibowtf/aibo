@@ -801,7 +801,7 @@
         <script>
         // Initialize Supabase
         const SUPABASE_URL = 'https://cpmapqoeyahbsuyxsyfh.supabase.co';
-        const SUPABASE_ANON_KEY = '{{SUPABASE_ANON_KEY}}';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
@@ -1187,7 +1187,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer {{SUPABASE_ANON_KEY}}`,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                     },
                     body: JSON.stringify({ endpoint: 'store/products', method: 'GET' }),
                 });
@@ -1227,7 +1227,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer {{SUPABASE_ANON_KEY}}`,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                     },
                     body: JSON.stringify({ endpoint: `store/products/${product.id}`, method: 'GET' }),
                 })
@@ -1304,7 +1304,7 @@
             checkoutBtn.disabled = cart.length === 0;
         }
     
-        const STRIPE_PUBLISHABLE_KEY = '{{STRIPE_PUBLISHABLE_KEY}}';
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_51S7XRZ47ILvE0Nk7RkdXIaBiprRtwKaEZBS5w0aDrNqx0PPjsFXMn5ZKKYKIetYTImr6uXUIeI8w1MW5I9gliowy00UenGwDg2';
         const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
         
         // Handle checkout with Embedded Checkout
@@ -1319,7 +1319,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer {{SUPABASE_ANON_KEY}}`,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                     },
                     body: JSON.stringify(cart),
                 });
