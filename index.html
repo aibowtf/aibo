@@ -1345,13 +1345,12 @@
             }
         }
         
-        // Handle success page after checkout
-        async function handleCheckoutSuccess() {
+       async function handleCheckoutSuccess() {
             const urlParams = new URLSearchParams(window.location.hash.replace('#', ''));
             const sessionId = urlParams.get('session_id');
             if (window.location.hash.startsWith('#success') && sessionId) {
                 navigateTo('success');
-                showMessage('Order placed successfully! You’ll receive a confirmation soon.', 'success');
+                showMessage('Payment successful! You’ll receive a confirmation email soon.', 'success');
                 cart = [];
                 updateCart();
         
@@ -1364,7 +1363,7 @@
         
                     if (error || !data) {
                         console.error('Error fetching order:', error);
-                        document.getElementById('order-details').innerHTML = '<p>Unable to load order details.</p>';
+                        document.getElementById('order-details').innerHTML = '<p>Unable to load order details. Please contact support.</p>';
                         return;
                     }
         
@@ -1375,12 +1374,12 @@
                         <ul style="list-style: none; padding: 0;">
                             ${cartItems.map(item => `<li>${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}</li>`).join('')}
                         </ul>
-                        <p><strong>Shipping Address:</strong> ${data.shipping_address.name || ''}, ${data.shipping_address.line1}, ${data.shipping_address.city}, ${data.shipping_address.state || ''} ${data.shipping_address.postal_code}, ${data.shipping_address.country}</p>
-                        <p><strong>Printful Order ID:</strong> ${data.printful_order_id || 'Pending'}</p>
+                        <p><strong>Shipping Address:</strong> ${data.shipping_address.name || 'N/A'}, ${data.shipping_address.line1}, ${data.shipping_address.city}, ${data.shipping_address.state || ''} ${data.shipping_address.postal_code}, ${data.shipping_address.country}</p>
+                        <p><strong>Order Number:</strong> ${data.printful_order_id || 'Pending'}</p>
                     `;
                 } catch (error) {
                     console.error('Error fetching order details:', error);
-                    document.getElementById('order-details').innerHTML = '<p>Unable to load order details.</p>';
+                    document.getElementById('order-details').innerHTML = '<p>Unable to load order details. Please contact support.</p>';
                 }
             }
         }
