@@ -485,7 +485,7 @@
         }
         
         #cart-items li {
-            color: var(--text-muted);
+            color: #ffffff !important;
             margin: 0.5rem 0;
         }
 
@@ -1306,9 +1306,9 @@
             const checkoutBtn = document.getElementById('checkout-btn');
             cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
             cartItems.innerHTML = cart.map((item, index) => `
-                <li style="display: flex; align-items: center; justify-content: space-between;">
+                <li style="display: flex; align-items: center; color: #ffffff;">
                     ${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}
-                    <span class="cart-remove-btn" onclick="removeFromCart(${index})" style="color: var(--teal); cursor: pointer; font-size: 1rem; margin-left: 10px;">&times;</span>
+                    <span class="cart-remove-btn" onclick="removeFromCart(${index})" style="color: var(--teal); cursor: pointer; font-size: 1rem; margin-left: 5px;">&times;</span>
                 </li>
             `).join('');
             checkoutBtn.disabled = cart.length === 0;
