@@ -1310,10 +1310,27 @@
         
             cart.forEach((item, index) => {
                 const li = document.createElement('li');
+                li.style.marginBottom = '10px'; // Space between items
                 li.innerHTML = `
                     ${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}
-                    <button onclick="removeFromCart(${index})" style="margin-left: 10px; color: red;">Remove</button>
+                    <button onclick="removeFromCart(${index})" style="
+                        margin-left: 10px;
+                        padding: 5px 10px;
+                        background-color: #ff4d4f;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: background-color 0.2s;
+                    ">Remove</button>
                 `;
+                li.querySelector('button').addEventListener('mouseover', (e) => {
+                    e.target.style.backgroundColor = '#d9363e';
+                });
+                li.querySelector('button').addEventListener('mouseout', (e) => {
+                    e.target.style.backgroundColor = '#ff4d4f';
+                });
                 ul.appendChild(li);
             });
         
