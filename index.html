@@ -813,12 +813,19 @@
     
         // Navigation functionality
         function navigateTo(pageId) {
+            console.log('Navigating to:', pageId);
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
-            document.getElementById(pageId).classList.add('active');
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            } else {
+                console.warn('Page not found, falling back to home:', pageId);
+                document.getElementById('home').classList.add('active');
+            }
             window.scrollTo(0, 0);
-        
+    
             const cassiopeiaMenu = document.querySelector('.cassiopeia-menu');
             if (pageId === 'whitelist' || pageId === 'merch' || pageId === 'success') {
                 cassiopeiaMenu.classList.add('hidden');
@@ -827,7 +834,7 @@
                 } else if (pageId === 'merch') {
                     fetchProducts();
                 } else if (pageId === 'success') {
-                    handleCheckoutSuccess(); // Trigger success handling
+                    handleCheckoutSuccess();
                 }
             } else {
                 cassiopeiaMenu.classList.remove('hidden');
@@ -1043,8 +1050,8 @@
                     const popupHeight = popupRect.height;
             
                     const viewportWidth = window.innerWidth;
-                    const viewportHeight = window.innerHeight;
-            
+                    const viewportHeight = window.innerWidth;
+    
                     let left = starRect.right + offsetX;
                     let top = (starRect.top + starRect.bottom) / 2 - popupHeight / 2 + offsetY;
                     let isValidPosition = true;
@@ -1313,6 +1320,9 @@
                 cart = [];
                 updateCart();
         
+                // Delay to ensure webhook populates orders table
+                await new Promise(resolve => setTimeout(resolve, 2000));
+        
                 try {
                     console.log('Fetching order details for sessionId:', sessionId);
                     const { data, error } = await supabase
@@ -1347,13 +1357,26 @@
     
         // Consolidated DOMContentLoaded listener
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, checking initial URL');
-            navigateTo(window.location.hash.replace('#', '') || 'home');
+            console.log('Page loaded, checking initial URL:', window.location.href);
+            // Parse hash carefully to handle query parameters
+            let initialPage = window.location.hash.replace('#', '').split('?')[0] || 'home';
+            if (!['home', 'whitelist', 'merch', 'success'].includes(initialPage)) {
+                initialPage = 'home';
+            }
+            navigateTo(initialPage);
             startCountRefresher();
             subscribeToWhitelistChanges();
             startProductRefresher();
             handleCheckoutSuccess(); // Check for success redirect on load
             document.getElementById('checkout-btn').addEventListener('click', handleCheckout);
+    
+            // Add hashchange listener for dynamic navigation
+            window.addEventListener('hashchange', () => {
+                console.log('Hash changed:', window.location.hash);
+                const pageId = window.location.hash.replace('#', '').split('?')[0] || 'home';
+                navigateTo(pageId);
+                handleCheckoutSuccess();
+            });
         });
     </script>
 </body>
