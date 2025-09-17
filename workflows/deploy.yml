@@ -15,7 +15,12 @@ jobs:
 
       - name: Install envsubst
         run: sudo apt-get update && sudo apt-get install -y gettext-base
-
+        
+      - name: Debug secrets
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: echo "SUPABASE_ANON_KEY starts with: ${SUPABASE_ANON_KEY:0:10}"
+        
       - name: Replace environment variables in index.html
         env:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
