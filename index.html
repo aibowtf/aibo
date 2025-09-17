@@ -488,6 +488,11 @@
             color: var(--text-muted);
             margin: 0.5rem 0;
         }
+
+        .cart-remove-btn:hover {
+            color: var(--teal-dark);
+            transform: scale(1.2);
+        }
         
         #checkout-btn {
             width: 200px;
@@ -1300,10 +1305,20 @@
             const cartItems = document.getElementById('cart-items');
             const checkoutBtn = document.getElementById('checkout-btn');
             cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartItems.innerHTML = cart.map(item => `<li>${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}</li>`).join('');
+            cartItems.innerHTML = cart.map((item, index) => `
+                <li style="display: flex; align-items: center; justify-content: space-between;">
+                    ${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}
+                    <span class="cart-remove-btn" onclick="removeFromCart(${index})" style="color: var(--teal); cursor: pointer; font-size: 1rem; margin-left: 10px;">&times;</span>
+                </li>
+            `).join('');
             checkoutBtn.disabled = cart.length === 0;
         }
-    
+
+        function removeFromCart(index) {
+            cart.splice(index, 1); // Remove the item at the specified index
+            updateCart(); // Update the cart UI
+        }
+            
         const STRIPE_PUBLISHABLE_KEY = 'pk_test_51S7XRZ47ILvE0Nk7RkdXIaBiprRtwKaEZBS5w0aDrNqx0PPjsFXMn5ZKKYKIetYTImr6uXUIeI8w1MW5I9gliowy00UenGwDg2';
         const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
         
