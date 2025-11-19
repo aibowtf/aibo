@@ -1218,8 +1218,12 @@
                         div.className = 'product-card';
                         div.dataset.productId = product.id;
                         const firstVariant = variants[0];
+                        
+                        // Escape product name for HTML attribute
+                        const escapedProductName = product.name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                        
                         div.innerHTML = `
-                            <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
+                            <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${escapedProductName}">
                             <h3>${product.name}</h3>
                             <p>$${firstVariant.retail_price || '25.00'}</p>
                             <select id="variant-${product.id}">
@@ -1228,15 +1232,17 @@
                                     return `<option value="${v.id}" data-size="${size}" data-price="${v.retail_price || '25.00'}">${v.name} ($${v.retail_price || '25.00'})</option>`;
                                 }).join('')}
                             </select>
-                            <button class="add-to-cart-btn" data-product-id="${product.id}" data-product-name="${product.name}" data-select-id="variant-${product.id}">Add to Cart</button>
+                            <button class="add-to-cart-btn" data-product-id="${product.id}" data-product-name="${escapedProductName}" data-select-id="variant-${product.id}">Add to Cart</button>
                         `;
                         
                         // Add event listener to the button
                         const addButton = div.querySelector('.add-to-cart-btn');
                         addButton.addEventListener('click', function() {
+                            // Decode the HTML entities back to regular text
+                            const productName = this.dataset.productName.replace(/&quot;/g, '"').replace(/&#39;/g, "'");
                             window.addToCart(
                                 this.dataset.productId,
-                                this.dataset.productName,
+                                productName,
                                 this.dataset.selectId
                             );
                         });
