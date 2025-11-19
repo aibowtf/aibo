@@ -820,8 +820,8 @@
         let isFetchingProducts = false;
         let checkoutInstance = null; // Track Stripe checkout instance
     
-        // Navigation functionality
-        function navigateTo(pageId) {
+        // Navigation functionality - make it global
+        window.navigateTo = function(pageId) {
             console.log('Navigating to:', pageId);
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
@@ -1247,8 +1247,8 @@
             });
         }
     
-        // Add to cart
-        function addToCart(productId, productName, selectId) {
+        // Add to cart - make it global
+        window.addToCart = function(productId, productName, selectId) {
             const select = document.getElementById(selectId);
             const variantId = select.value;
             const price = parseFloat(select.options[select.selectedIndex].dataset.price);
@@ -1279,7 +1279,8 @@
             checkoutBtn.disabled = cart.length === 0;
         }
 
-        function removeFromCart(index) {
+        // Remove from cart - make it global
+        window.removeFromCart = function(index) {
             cart.splice(index, 1); // Remove the item at the specified index
             updateCart(); // Update the cart UI
         }
