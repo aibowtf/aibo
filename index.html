@@ -1224,12 +1224,14 @@
                         
                         div.innerHTML = `
                             <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${escapedProductName}">
-                            <h3>${product.name}</h3>
+                            <h3>${product.name.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h3>
                             <p>$${firstVariant.retail_price || '25.00'}</p>
                             <select id="variant-${product.id}">
                                 ${variants.map(v => {
                                     const size = v.name.split(' - ').pop() || 'Unknown';
-                                    return `<option value="${v.id}" data-size="${size}" data-price="${v.retail_price || '25.00'}">${v.name} ($${v.retail_price || '25.00'})</option>`;
+                                    const escapedVariantName = v.name.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                                    const escapedSize = size.replace(/"/g, '&quot;');
+                                    return `<option value="${v.id}" data-size="${escapedSize}" data-price="${v.retail_price || '25.00'}">${escapedVariantName} ($${v.retail_price || '25.00'})</option>`;
                                 }).join('')}
                             </select>
                             <button class="add-to-cart-btn" data-product-id="${product.id}" data-product-name="${escapedProductName}" data-select-id="variant-${product.id}">Add to Cart</button>
