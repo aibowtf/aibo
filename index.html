@@ -786,7 +786,7 @@
                 <div class="content-section">
                     <h2>Payment Successful!</h2>
                     <p>Thank you for your purchase! You'll receive a confirmation email soon.</p>
-                    <button class="submit-btn" onclick="navigateTo('home'); window.location.hash = 'home';" style="margin-top: 1rem;">Return to Home</button>
+                    <button class="submit-btn" id="returnHomeBtn" style="margin-top: 1rem;">Return to Home</button>
                 </div>
             </section>
 
@@ -800,7 +800,7 @@
                 <a href="https://github.com/aibowtf"><i class="fab fa-github"></i></a>
                 <a href="https://drip.trade/"><i class="fas fa-droplet"></i></a>
                 <a href="https://img_aibowtf.arweave.net"><i class="fas fa-hard-drive"></i></a>
-                <a href="#merch" onclick="navigateTo('merch')"><i class="fas fa-shirt"></i></a>
+                <a href="#merch" id="merchLink"><i class="fas fa-shirt"></i></a>
             </div>
         </div>
     </footer>
@@ -1228,8 +1228,19 @@
                                     return `<option value="${v.id}" data-size="${size}" data-price="${v.retail_price || '25.00'}">${v.name} ($${v.retail_price || '25.00'})</option>`;
                                 }).join('')}
                             </select>
-                            <button onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', 'variant-${product.id}')">Add to Cart</button>
+                            <button class="add-to-cart-btn" data-product-id="${product.id}" data-product-name="${product.name}" data-select-id="variant-${product.id}">Add to Cart</button>
                         `;
+                        
+                        // Add event listener to the button
+                        const addButton = div.querySelector('.add-to-cart-btn');
+                        addButton.addEventListener('click', function() {
+                            window.addToCart(
+                                this.dataset.productId,
+                                this.dataset.productName,
+                                this.dataset.selectId
+                            );
+                        });
+                        
                         shopContainer.appendChild(div);
                     })
                     .catch(error => {
@@ -1273,9 +1284,17 @@
             cartItems.innerHTML = cart.map((item, index) => `
                 <li style="display: flex; align-items: center; color: #ffffff; gap: 5px;">
                     ${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}
-                    <span class="cart-remove-btn" onclick="removeFromCart(${index})" style="color: var(--teal); cursor: pointer; font-size: 1rem;">&times;</span>
+                    <span class="cart-remove-btn" data-index="${index}" style="color: var(--teal); cursor: pointer; font-size: 1rem;">&times;</span>
                 </li>
             `).join('');
+            
+            // Add event listeners to all remove buttons
+            document.querySelectorAll('.cart-remove-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    window.removeFromCart(parseInt(this.dataset.index));
+                });
+            });
+            
             checkoutBtn.disabled = cart.length === 0;
         }
 
@@ -1384,6 +1403,25 @@
         // Consolidated DOMContentLoaded listener
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, checking initial URL:', window.location.href);
+            
+            // Add event listener for Return to Home button
+            const returnHomeBtn = document.getElementById('returnHomeBtn');
+            if (returnHomeBtn) {
+                returnHomeBtn.addEventListener('click', function() {
+                    window.navigateTo('home');
+                    window.location.hash = 'home';
+                });
+            }
+            
+            // Add event listener for merch link
+            const merchLink = document.getElementById('merchLink');
+            if (merchLink) {
+                merchLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.navigateTo('merch');
+                });
+            }
+            
             // Parse hash carefully to handle query parameters
             let initialPage = window.location.hash.replace('#', '').split('?')[0] || 'home';
             if (!['home', 'whitelist', 'merch', 'success'].includes(initialPage)) {
