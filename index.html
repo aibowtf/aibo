@@ -1366,7 +1366,7 @@
             if (window.location.hash.startsWith('#success') && sessionId) {
                 console.log('Navigating to success page with sessionId:', sessionId);
                 navigateTo('success');
-                showMessage('Payment successful! You'll receive a confirmation email soon.', 'success');
+                showMessage('Payment successful! You will receive a confirmation email soon.', 'success');
                 cart = [];
                 updateCart();
         
@@ -1396,7 +1396,10 @@
                     orderDetails.innerHTML = `
                         <h3>Order Details</h3>
                         <ul style="list-style: none; padding: 0;">
-                            ${cartItems.map(item => `<li>${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}</li>`).join('')}
+                            ${cartItems.map(item => {
+                                const escapedName = (item.product_name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                                return `<li>${escapedName} (${item.size}) - $${item.price} x ${item.quantity}</li>`;
+                            }).join('')}
                         </ul>
                         <p><strong>Shipping Address:</strong> ${data.shipping_address.name || 'N/A'}, ${data.shipping_address.line1}, ${data.shipping_address.city}, ${data.shipping_address.state || ''} ${data.shipping_address.postal_code}, ${data.shipping_address.country}</p>
                         <p><strong>Order Number:</strong> ${data.printful_order_id || 'Pending'}</p>
