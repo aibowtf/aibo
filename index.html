@@ -734,7 +734,7 @@
                 <section class="hero">
                     <div class="hero-content">
                         <h1>AIbo</h1>
-                        <button class="join-whitelist-btn" id="joinWhitelistBtn">JOIN WHITELIST</button>
+                        <button class="join-whitelist-btn" id="joinWhitelistBtn">CHECK WHITELIST</button>
                     </div>
                 </section>
             </section>
@@ -742,7 +742,7 @@
             <!-- Whitelist Page -->
             <section id="whitelist" class="page">
                 <div class="content-section">
-                    <p>Whitelist is full.</p> 
+                    <p>Check if your wallet address is on the whitelist.</p> 
                     <p>Follow on X and Discord for more opportunities to secure a seat on the ship.</p>
                 </div>
 
@@ -752,7 +752,7 @@
                             <label for="walletAddress">Wallet Address</label>
                             <input type="text" id="walletAddress" name="walletAddress" placeholder="Enter your wallet address..." required>
                         </div>
-                        <button type="submit" class="submit-btn" id="submitBtn">Submit</button>
+                        <button type="submit" class="submit-btn" id="submitBtn">Check Whitelist</button>
                         <div class="progress-info">
                             <p id="submissionCount">Loading...<span class="status-indicator status-offline" id="statusIndicator"></span></p>
                             <p id="serverStatus" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"></p>
@@ -876,7 +876,7 @@
             fetchProducts();
         }
     
-        // JOIN WHITELIST button functionality
+        // CHECK WHITELIST button functionality
         document.getElementById('joinWhitelistBtn').addEventListener('click', function() {
             navigateTo('whitelist');
         });
@@ -914,21 +914,9 @@
                 
                 const submissionCount = document.getElementById('submissionCount');
                 submissionCount.innerHTML = 
-                    `${count}/${maxAddresses} addresses submitted <span class="status-indicator status-online" id="statusIndicator"></span>`;
+                    `${count}/${maxAddresses} addresses on whitelist <span class="status-indicator status-online" id="statusIndicator"></span>`;
                 document.getElementById('serverStatus').textContent = 'Live count from server';
                 document.getElementById('statusIndicator').className = 'status-indicator status-online';
-                
-                const submitBtn = document.getElementById('submitBtn');
-                const addressInput = document.getElementById('walletAddress');
-                if (count >= maxAddresses) {
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Whitelist Full';
-                    addressInput.disabled = true;
-                } else {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Submit';
-                    addressInput.disabled = false;
-                }
                 
                 return count;
             } catch (error) {
@@ -941,8 +929,8 @@
             }
         }
     
-        // Check if address is already submitted
-        async function isDuplicateAddress(address) {
+        // Check if address is on whitelist
+        async function checkWhitelistStatus(address) {
             try {
                 const cleanAddress = address.trim().toLowerCase();
                 const { data, error } = await supabase
@@ -954,29 +942,12 @@
                 
                 return data && data.length > 0;
             } catch (error) {
-                console.error('Error checking duplicate:', error);
-                showMessage('Error checking duplicates. Please try again.', 'error');
-                return false;
-            }
-        }
-    
-        // Submit address to Supabase
-        async function submitAddress(address) {
-            try {
-                const { data, error } = await supabase
-                    .from('whitelist')
-                    .insert([{ wallet_address: address.toLowerCase() }]);
-                
-                if (error) throw error;
-                
-                return true;
-            } catch (error) {
-                console.error('Error submitting address:', error);
+                console.error('Error checking whitelist:', error);
                 throw error;
             }
         }
     
-        // Handle form submission
+        // Handle form submission - CHECK whitelist status
         document.getElementById('whitelistForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -994,35 +965,25 @@
                 return;
             }
             
-            const isDuplicate = await isDuplicateAddress(address);
-            if (isDuplicate) {
-                showMessage('This wallet address has already been submitted', 'error');
-                return;
-            }
-            
-            const count = await getSubmissionCount();
-            if (count >= maxAddresses) {
-                showMessage('Whitelist is full!', 'error');
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Whitelist Full';
-                addressInput.disabled = true;
-                return;
-            }
-            
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            submitBtn.textContent = 'Checking...';
             
             try {
-                await submitAddress(address);
-                showMessage('Wallet address submitted successfully!', 'success');
+                const isOnWhitelist = await checkWhitelistStatus(address);
+                
+                if (isOnWhitelist) {
+                    showMessage('✓ This wallet address is on the whitelist!', 'success');
+                } else {
+                    showMessage('✗ This wallet address is not on the whitelist.', 'error');
+                }
+                
                 addressInput.value = '';
-                await getSubmissionCount();
             } catch (error) {
-                console.error('Submission error:', error);
-                showMessage('Error submitting address. Please try again.', 'error');
+                console.error('Check error:', error);
+                showMessage('Error checking whitelist. Please try again.', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit';
+                submitBtn.textContent = 'Check Whitelist';
             }
         });
     
@@ -1377,7 +1338,7 @@
             if (window.location.hash.startsWith('#success') && sessionId) {
                 console.log('Navigating to success page with sessionId:', sessionId);
                 navigateTo('success');
-                showMessage('Payment successful! You’ll receive a confirmation email soon.', 'success');
+                showMessage('Payment successful! You'll receive a confirmation email soon.', 'success');
                 cart = [];
                 updateCart();
         
