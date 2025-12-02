@@ -67,8 +67,8 @@
             overflow-x: hidden;
         }
 
-        /* Static Image Background */
-        .image-background {
+        /* Video Background */
+        .video-background {
             position: fixed;
             top: 0;
             left: 0;
@@ -77,12 +77,29 @@
             z-index: -1;
             overflow: hidden;
         }
-
-        .image-background img {
+        
+        .video-background video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            filter: brightness(0.8); /* Adjust darkness as needed */
+        }
+        
+        /* Optional: Add a dark overlay on the video */
+        .video-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            filter: brightness(0.4);
+            background: rgba(0, 0, 0, 0.3); /* Adjust opacity for darkness */
+            z-index: 1;
         }
 
         .container {
@@ -509,10 +526,12 @@
     </style>
 </head>
 <body>
-    <!-- Static Image Background -->
-    <div class="image-background">
-        <img src="aibonew.png" alt="AIbo Background">
-    </div>
+    <!-- Video Background -->
+    <div class="video-background">
+    <video autoplay muted loop playsinline>
+        <source src="bkg2.mp4" type="video/mp4">
+    </video>
+</div>
 
     <!-- Main Content -->
     <main>
