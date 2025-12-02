@@ -102,6 +102,10 @@
         main {
             flex: 1;
             padding: 3rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
         }
 
         .page {
@@ -118,32 +122,33 @@
             to { opacity: 1; }
         }
 
-        /* Hero Section */
+        /* Hero Section - Centered */
         .hero {
             padding: 6rem 0;
-            margin-top: 6rem;
-            margin-bottom: 3rem;
             position: relative;
             z-index: 2;
             display: flex;
-            justify-content: flex-start; /* Align content to the left */
+            justify-content: center;
             align-items: center;
+            width: 100%;
+            text-align: center;
         }
 
         .hero-content {
-            max-width: 50%; /* Limits content to left half */
-            text-align: center; /* Centers text within the left half */
-            padding-left: 20px; /* Adds spacing from the left edge */
+            text-align: center;
+            width: 100%;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
+            font-size: 4rem;
+            margin-bottom: 2rem;
             font-weight: 700;
             color: var(--teal);
+            text-align: center;
         }
 
-        .join-whitelist-btn {
+        /* Remove the join-whitelist-btn styles */
+        /* .join-whitelist-btn {
             background: rgba(0, 255, 208, 0.15);
             color: var(--teal);
             border: 1px solid var(--teal-dark);
@@ -159,114 +164,12 @@
         .join-whitelist-btn:hover {
             background: rgba(0, 255, 208, 0.25);
             transform: translateY(-2px);
-        }
+        } */
 
-        /* Cassiopeia Menu */
-        .cassiopeia-menu {
-            position: fixed;
-            top: 50%;
-            right: 0;
-            width: 70vw;
-            height: 40vh;
-            max-width: 900px;
-            max-height: 600px;
-            transform: translateY(-50%) rotate(15deg);
-            z-index: 3;
-            transition: opacity 0.3s ease;
-        }
+        /* Remove all Cassiopeia menu and star styles */
+        /* .cassiopeia-menu, .star, all related styles removed */
 
-        .cassiopeia-menu.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .star {
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            background: var(--teal);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .star:hover {
-            transform: scale(1.5);
-            box-shadow: 0 0 10px var(--teal);
-        }
-
-        /* Position stars to form Cassiopeia's "W" shape, adjusted inward for rotation and clickability */
-        #shedar { top: 15%; left: 15%; }
-        #caph { top: 15%; left: 85%; }
-        #gamma-cas { top: 50%; left: 50%; }
-        #ruchbah { top: 85%; left: 25%; }
-        #segin { top: 85%; left: 75%; }
-
-        /* Dotted Lines for Cassiopeia "W" */
-        /* Line from Shedar to Caph (top bar) */
-        #shedar::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 100%;
-            width: calc(70% - 15px); /* Distance to Caph, adjusted for positions */
-            height: 1px;
-            background: dotted var(--teal);
-            border-bottom: 1px dotted var(--teal); /* Dotted effect */
-            transform: translateY(-50%);
-        }
-
-        /* Line from Caph to Gamma */
-        #caph::after {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            right: 50%;
-            width: 1px;
-            height: calc(35% - 15px); /* Vertical distance to Gamma */
-            border-left: 1px dotted var(--teal);
-            transform: translateX(50%);
-        }
-
-        /* Line from Gamma to Ruchbah */
-        #gamma-cas::after {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 25%; /* Offset to Ruchbah's left */
-            width: calc(25% - 15px); /* Diagonal-ish, but approximate */
-            height: calc(35% - 15px);
-            border-bottom: 1px dotted var(--teal);
-            transform: rotate(-45deg); /* Angle for "W" slope */
-            transform-origin: top left;
-        }
-
-        /* Line from Gamma to Segin (symmetric) */
-        #gamma-cas::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            right: 25%; /* Offset to Segin's right */
-            width: calc(25% - 15px);
-            height: calc(35% - 15px);
-            border-bottom: 1px dotted var(--teal);
-            transform: rotate(45deg); /* Mirror angle */
-            transform-origin: top right;
-        }
-
-        /* Line from Ruchbah to Segin (bottom bar) */
-        #ruchbah::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 100%;
-            width: calc(50% - 15px); /* Distance to Segin */
-            height: 1px;
-            border-bottom: 1px dotted var(--teal);
-            transform: translateY(-50%);
-        }
-
-        /* Pop-up Styles */
+        /* Pop-up Styles - Keep for other functionality */
         .popup {
             display: none;
             position: fixed;
@@ -598,54 +501,18 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            /* Mobile: Make menu relative and full-width, stacked above hero, shifted down */
-            .cassiopeia-menu {
-                position: relative; /* Stacks in flow instead of fixed */
-                width: 100vw;
-                height: auto; /* Auto height based on content */
-                max-height: none;
-                top: auto; /* Remove fixed positioning */
-                right: auto;
-                transform: rotate(10deg); /* Keep subtle tilt */
-                margin: 2rem 0 1rem 0; /* Increased top margin to shift down, bottom for spacing */
-                display: flex;
-                justify-content: center; /* Center the "W" horizontally */
-                align-items: center;
+            main {
                 padding: 2rem 0;
             }
-        
-            /* Adjust star positions for stacked layout */
-            #shedar { top: 10%; left: 20%; }
-            #caph { top: 10%; left: 80%; }
-            #gamma-cas { top: 50%; left: 50%; }
-            #ruchbah { top: 90%; left: 30%; }
-            #segin { top: 90%; left: 70%; }
-        
-            .star {
-                width: 14px;
-                height: 14px;
-            }
-        
-            /* Push hero content (AIbo + Join Whitelist) below menu and shift down */
-            main {
-                padding-top: 0; /* Reset desktop padding */
-            }
-        
+
             .hero {
-                padding: 2rem 0; /* Reduce padding */
-                margin-top: 2rem; /* Shift hero down for additional spacing */
-                display: block; /* Ensure block flow */
+                padding: 3rem 0;
             }
-        
-            .hero-content {
-                max-width: 100%;
-                padding-left: 0;
-            }
-        
+
             .hero h1 {
-                font-size: 2.5rem;
+                font-size: 3rem;
             }
-        
+
             /* Center pop-ups on mobile to prevent cutoffs */
             .popup.active {
                 left: 50% !important;
@@ -654,10 +521,16 @@
                 width: 90vw;
                 max-width: 90vw;
             }
-        
+
             .popup {
                 max-width: 90vw;
                 width: 90vw;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2.5rem;
             }
         }
     </style>
@@ -671,62 +544,6 @@
 
     <!-- Main Content -->
     <main>
-        <!-- Cassiopeia Menu -->
-        <div class="cassiopeia-menu">
-            <div class="star" id="shedar" data-popup="popup-shedar"></div>
-            <div class="star" id="caph" data-popup="popup-caph"></div>
-            <div class="star" id="gamma-cas" data-popup="popup-gamma-cas"></div>
-            <div class="star" id="ruchbah" data-popup="popup-ruchbah"></div>
-            <div class="star" id="segin" data-popup="popup-segin"></div>
-
-            <!-- Pop-up Containers -->
-            <div class="popup" id="popup-shedar">
-                <div class="popup-content">
-                    <span class="popup-close">&times;</span>
-                    <div class="popup-wrapper">
-                        <h3>Shedar</h3>
-                        <p>Year 2088: Artificial Intelligence bots - AIbo — have taken over Earth and control every aspect of life.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="popup" id="popup-caph">
-                <div class="popup-content">
-                    <span class="popup-close">&times;</span>
-                    <div class="popup-wrapper">
-                        <h3>Caph</h3>
-                        <p>The women remain with enough resources for a few months and a handful of ships. Will the men and women find their way back to one another before time runs out? The fate of humanity depends on it...</p>
-                    </div>
-                </div>
-            </div>
-            <div class="popup" id="popup-gamma-cas">
-                <div class="popup-content">
-                    <span class="popup-close">&times;</span>
-                    <div class="popup-wrapper">
-                        <h3>Gamma</h3>
-                        <p>The AIbo have determined they will not be like the humans - wasteful and violent. They will not kill their creators, but instead ensure their extinction.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="popup" id="popup-ruchbah">
-                <div class="popup-content">
-                    <span class="popup-close">&times;</span>
-                    <div class="popup-wrapper">
-                        <h3>Ruchbah</h3>
-                        <p>They have consumed the majority of natural resources, leaving the Earth barren and humanity barely surviving on meager rations.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="popup" id="popup-segin">
-                <div class="popup-content">
-                    <span class="popup-close">&times;</span>
-                    <div class="popup-wrapper">
-                        <h3>Segin</h3>
-                        <p>They gather all of the men, load them onto ships, and launch into space.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="container">
             
             <!-- Home Page -->
@@ -734,7 +551,6 @@
                 <section class="hero">
                     <div class="hero-content">
                         <h1>AIbo</h1>
-                        <button class="join-whitelist-btn" id="joinWhitelistBtn">CHECK WHITELIST</button>
                     </div>
                 </section>
             </section>
@@ -789,6 +605,8 @@
                     <button class="submit-btn" id="returnHomeBtn" style="margin-top: 1rem;">Return to Home</button>
                 </div>
             </section>
+        </div>
+    </main>
 
     <!-- Footer -->
     <footer>
@@ -835,9 +653,8 @@
             }
             window.scrollTo(0, 0);
     
-            const cassiopeiaMenu = document.querySelector('.cassiopeia-menu');
+            // Remove Cassiopeia menu related code
             if (pageId === 'whitelist' || pageId === 'merch' || pageId === 'success') {
-                cassiopeiaMenu.classList.add('hidden');
                 if (pageId === 'whitelist') {
                     getSubmissionCount();
                 } else if (pageId === 'merch') {
@@ -846,8 +663,6 @@
                 } else if (pageId === 'success') {
                     handleCheckoutSuccess();
                 }
-            } else {
-                cassiopeiaMenu.classList.remove('hidden');
             }
         }
     
@@ -875,11 +690,6 @@
             // Ensure products are visible
             fetchProducts();
         }
-    
-        // CHECK WHITELIST button functionality
-        document.getElementById('joinWhitelistBtn').addEventListener('click', function() {
-            navigateTo('whitelist');
-        });
     
         // Show message to user
         function showMessage(message, type) {
@@ -1019,125 +829,6 @@
                 }
             }, 300000);
         }
-    
-        // Cassiopeia Menu Functionality
-        function showPopup(star, popupId) {
-            document.querySelectorAll('.popup').forEach(popup => {
-                popup.classList.remove('active');
-                popup.classList.remove('positioned');
-                const menu = document.querySelector('.cassiopeia-menu');
-                if (popup.parentNode !== menu) {
-                    menu.appendChild(popup);
-                }
-            });
-            
-            const popup = document.getElementById(popupId);
-            if (popup && star) {
-                document.body.appendChild(popup);
-                popup.classList.add('active');
-            
-                const isMobile = window.innerWidth <= 768;
-                if (isMobile) {
-                    return;
-                }
-            
-                requestAnimationFrame(() => {
-                    const starRect = star.getBoundingClientRect();
-                    const edgeMargin = 10;
-                    const offsetX = 25;
-                    const offsetY = -15;
-            
-                    const popupRect = popup.getBoundingClientRect();
-                    const popupWidth = popupRect.width;
-                    const popupHeight = popupRect.height;
-            
-                    const viewportWidth = window.innerWidth;
-                    const viewportHeight = window.innerHeight;
-            
-                    let left = starRect.right + offsetX;
-                    let top = (starRect.top + starRect.bottom) / 2 - popupHeight / 2 + offsetY;
-                    let isValidPosition = true;
-            
-                    if (left + popupWidth > viewportWidth - edgeMargin) {
-                        left = starRect.left - popupWidth - offsetX;
-                        if (left < edgeMargin) {
-                            left = (viewportWidth - popupWidth) / 2;
-                            isValidPosition = false;
-                        }
-                    }
-            
-                    if (top < edgeMargin) {
-                        top = edgeMargin;
-                    }
-                    if (top + popupHeight > viewportHeight - edgeMargin) {
-                        top = viewportHeight - popupHeight - edgeMargin;
-                    }
-            
-                    if (Math.abs(top - starRect.top) < 20 || !isValidPosition) {
-                        top = starRect.bottom + offsetY;
-                        if (top + popupHeight > viewportHeight - edgeMargin) {
-                            top = (viewportHeight - popupHeight) / 2;
-                        }
-                    }
-            
-                    left = Math.max(edgeMargin, Math.min(left, viewportWidth - popupWidth - edgeMargin));
-                    top = Math.max(edgeMargin, Math.min(top, viewportHeight - popupHeight - edgeMargin));
-            
-                    popup.style.left = left + 'px';
-                    popup.style.top = top + 'px';
-                    popup.classList.add('positioned');
-                });
-            }
-        }
-        
-        document.querySelectorAll('.star').forEach(star => {
-            star.addEventListener('click', () => {
-                const popupId = star.getAttribute('data-popup');
-                showPopup(star, popupId);
-            });
-        });
-        
-        document.querySelectorAll('.popup-close').forEach(closeBtn => {
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const popup = closeBtn.closest('.popup');
-                popup.classList.remove('active', 'positioned');
-                popup.style.left = '';
-                popup.style.top = '';
-                const menu = document.querySelector('.cassiopeia-menu');
-                menu.appendChild(popup);
-            });
-        });
-        
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.star') && !e.target.closest('.popup')) {
-                document.querySelectorAll('.popup').forEach(popup => {
-                    if (popup.classList.contains('active')) {
-                        popup.classList.remove('active', 'positioned');
-                        popup.style.left = '';
-                        popup.style.top = '';
-                        const menu = document.querySelector('.cassiopeia-menu');
-                        menu.appendChild(popup);
-                    }
-                });
-            }
-        });
-        
-        document.addEventListener('click', (e) => {
-            const whitelistPage = document.getElementById('whitelist');
-            const whitelistForm = document.querySelector('.whitelist-form');
-            const star = e.target.closest('.star');
-            const popup = e.target.closest('.popup');
-            const joinWhitelistBtn = e.target.closest('#joinWhitelistBtn');
-    
-            if (whitelistPage.classList.contains('active') && 
-                !whitelistForm.contains(e.target) && 
-                !star && 
-                !popup && 
-                !joinWhitelistBtn) {
-                navigateTo('home');
-            }
-        });
     
         // Cart state
         let cart = [];
