@@ -383,19 +383,20 @@
 
         .comic-image-container {
             max-width: 100%;
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow: auto;
         }
 
         #comic-image {
-            max-height: calc(100vh - 120px);
+            max-width: 100%;
+            max-height: calc(100vh - 140px);
+            width: auto;
             height: auto;
+            object-fit: contain;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             display: none;
-            transition: transform 0.2s ease;
-            transform-origin: top center;
         }
 
         .loading-spinner {
@@ -764,19 +765,62 @@
             }
 
             .reader-header {
-                padding: 1rem;
+                padding: 0.75rem 1rem;
                 flex-wrap: wrap;
-                gap: 1rem;
+                gap: 0.5rem;
+            }
+
+            .reader-title {
+                font-size: 1rem;
+                width: 100%;
+                text-align: center;
             }
 
             .reader-controls {
                 width: 100%;
                 justify-content: center;
-                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .reader-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .page-indicator {
+                font-size: 0.8rem;
+                min-width: 80px;
             }
 
             .reader-content {
-                padding: 1rem;
+                padding: 0.5rem;
+            }
+
+            #comic-image {
+                max-height: calc(100vh - 160px);
+            }
+
+            .close-reader {
+                position: absolute;
+                top: 0.5rem;
+                right: 0.5rem;
+            }
+
+            /* Fix footer on mobile */
+            footer {
+                padding: 1rem 0;
+            }
+
+            .social-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.75rem;
+                padding: 0 1rem;
+            }
+
+            .social-links a {
+                width: 36px;
+                height: 36px;
             }
 
             /* Center pop-ups on mobile to prevent cutoffs */
@@ -798,6 +842,27 @@
             .hero h1 {
                 font-size: 2.5rem;
             }
+
+            .explore-btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+
+            .social-links a {
+                width: 32px;
+                height: 32px;
+                font-size: 0.85rem;
+            }
+
+            .reader-btn {
+                padding: 5px 10px;
+                font-size: 0.8rem;
+            }
+
+            .page-indicator {
+                font-size: 0.75rem;
+                min-width: 70px;
+            }
         }
     </style>
 </head>
@@ -813,7 +878,7 @@
     <!-- PDF Reader Modal -->
     <div class="reader-modal" id="readerModal">
         <div class="reader-header">
-            <span class="reader-title" id="readerTitle">AIbo Prologue</span>
+            <span class="reader-title" id="readerTitle">AIbo Issue #1</span>
             <div class="reader-controls">
                 <button class="reader-btn" id="prevPage">
                     <i class="fas fa-chevron-left"></i> Prev
@@ -821,12 +886,6 @@
                 <span class="page-indicator" id="pageIndicator">Cover (1/7)</span>
                 <button class="reader-btn" id="nextPage">
                     Next <i class="fas fa-chevron-right"></i>
-                </button>
-                <button class="reader-btn" id="zoomOut">
-                    <i class="fas fa-minus"></i>
-                </button>
-                <button class="reader-btn" id="zoomIn">
-                    <i class="fas fa-plus"></i>
                 </button>
             </div>
             <button class="close-reader" id="closeReader">
@@ -965,7 +1024,7 @@
         // COMIC CONFIGURATION - Add new issues here!
         // ===========================================
         const comics = [
-            { id: 1, title: "AIbo", subtitle: "Prologue", pages: 5 },
+            { id: 1, title: "AIbo", subtitle: "Issue #1", pages: 5 },
             // Add more issues like this:
             // { id: 2, title: "AIbo", subtitle: "Issue #2", pages: 8 },
             // { id: 3, title: "AIbo", subtitle: "Issue #3", pages: 6 },
@@ -976,10 +1035,6 @@
         let comicPages = [];
         let currentPage = 0;
         let totalPages = 0;
-        let currentZoom = 1;
-        const MIN_ZOOM = 0.5;
-        const MAX_ZOOM = 3;
-        const ZOOM_STEP = 0.25;
 
         // Generate comic cards from config
         function renderComicCards() {
@@ -1047,7 +1102,6 @@
             comicPages = pages;
             totalPages = pages.length;
             currentPage = 0;
-            currentZoom = 1;
             
             modal.classList.add('active');
             document.getElementById('readerTitle').textContent = title;
@@ -1068,7 +1122,6 @@
             img.onload = function() {
                 loadingSpinner.style.display = 'none';
                 img.style.display = 'block';
-                applyZoom();
             };
             
             img.onerror = function() {
@@ -1086,11 +1139,6 @@
             document.getElementById('nextPage').disabled = currentPage >= totalPages - 1;
         }
 
-        function applyZoom() {
-            const img = document.getElementById('comic-image');
-            img.style.transform = 'scale(' + currentZoom + ')';
-        }
-
         // Reader controls
         document.getElementById('prevPage').addEventListener('click', () => {
             if (currentPage > 0) {
@@ -1106,24 +1154,9 @@
             }
         });
 
-        document.getElementById('zoomIn').addEventListener('click', () => {
-            if (currentZoom < MAX_ZOOM) {
-                currentZoom += ZOOM_STEP;
-                applyZoom();
-            }
-        });
-
-        document.getElementById('zoomOut').addEventListener('click', () => {
-            if (currentZoom > MIN_ZOOM) {
-                currentZoom -= ZOOM_STEP;
-                applyZoom();
-            }
-        });
-
         document.getElementById('closeReader').addEventListener('click', () => {
             document.getElementById('readerModal').classList.remove('active');
             comicPages = [];
-            currentZoom = 1;
         });
 
         // Keyboard navigation for reader
@@ -1137,10 +1170,6 @@
                 document.getElementById('nextPage').click();
             } else if (e.key === 'Escape') {
                 document.getElementById('closeReader').click();
-            } else if (e.key === '+' || e.key === '=') {
-                document.getElementById('zoomIn').click();
-            } else if (e.key === '-') {
-                document.getElementById('zoomOut').click();
             }
         });
     
