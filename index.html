@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         /* Doto Font Implementation */
         @font-face {
@@ -140,6 +141,278 @@
             font-weight: 700;
             color: var(--teal);
             text-align: center;
+        }
+
+        /* Explore Button - matches submit-btn style */
+        .explore-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 255, 208, 0.15);
+            color: var(--teal);
+            border: 1px solid var(--teal-dark);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            font-family: 'Doto', sans-serif;
+        }
+
+        .explore-btn:hover {
+            background: rgba(0, 255, 208, 0.25);
+        }
+
+        /* Zoom Transition Overlay */
+        .zoom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            background: var(--dark-bg);
+        }
+
+        .zoom-overlay.active {
+            pointer-events: all;
+            animation: zoomFade 1.2s ease-in-out forwards;
+        }
+
+        @keyframes zoomFade {
+            0% { opacity: 0; }
+            40% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+
+        /* Comics Page */
+        .comics-page {
+            padding: 4rem 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .comics-header {
+            margin-bottom: 3rem;
+        }
+
+        .comics-header h2 {
+            font-size: 2.5rem;
+            color: var(--teal);
+            margin-bottom: 0.5rem;
+        }
+
+        .comics-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .comic-grid {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .comic-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            max-width: 320px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .comic-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .comic-cover {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .comic-title {
+            color: var(--teal);
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .comic-issue {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .read-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 1rem;
+            color: var(--teal);
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .comic-card:hover .read-indicator {
+            opacity: 1;
+        }
+
+        /* Back button */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 208, 0.15);
+            border: 1px solid var(--teal-dark);
+            color: var(--teal);
+            padding: 10px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            z-index: 100;
+            font-family: 'Doto', sans-serif;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 208, 0.25);
+        }
+
+        /* PDF Reader Modal */
+        .reader-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.98);
+            z-index: 2000;
+            flex-direction: column;
+        }
+
+        .reader-modal.active {
+            display: flex;
+        }
+
+        .reader-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--dark-card);
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .reader-title {
+            color: var(--teal);
+            font-size: 1.2rem;
+        }
+
+        .reader-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .reader-btn {
+            background: rgba(0, 255, 208, 0.15);
+            border: 1px solid var(--teal-dark);
+            color: var(--teal);
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            font-family: 'Doto', sans-serif;
+        }
+
+        .reader-btn:hover {
+            background: rgba(0, 255, 208, 0.25);
+        }
+
+        .reader-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-indicator {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .close-reader {
+            background: transparent;
+            border: none;
+            color: var(--teal);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .close-reader:hover {
+            color: var(--teal-dark);
+        }
+
+        .reader-content {
+            flex: 1;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem;
+            background: var(--dark-bg);
+        }
+
+        .pdf-canvas-container {
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #pdf-canvas {
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--dark-border);
+            border-top-color: var(--teal);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Pop-up Styles - Keep for other functionality */
@@ -486,6 +759,22 @@
                 font-size: 3rem;
             }
 
+            .reader-header {
+                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .reader-controls {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .reader-content {
+                padding: 1rem;
+            }
+
             /* Center pop-ups on mobile to prevent cutoffs */
             .popup.active {
                 left: 50% !important;
@@ -514,6 +803,43 @@
         <img src="aibonew.png" alt="AIbo Background">
     </div>
 
+    <!-- Zoom Transition Overlay -->
+    <div class="zoom-overlay" id="zoomOverlay"></div>
+
+    <!-- PDF Reader Modal -->
+    <div class="reader-modal" id="readerModal">
+        <div class="reader-header">
+            <span class="reader-title" id="readerTitle">AIbo Issue #1</span>
+            <div class="reader-controls">
+                <button class="reader-btn" id="prevPage">
+                    <i class="fas fa-chevron-left"></i> Prev
+                </button>
+                <span class="page-indicator" id="pageIndicator">Page 1 of 1</span>
+                <button class="reader-btn" id="nextPage">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="reader-btn" id="zoomOut">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="reader-btn" id="zoomIn">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <button class="close-reader" id="closeReader">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="reader-content">
+            <div class="pdf-canvas-container">
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner"></div>
+                    <span>Loading comic...</span>
+                </div>
+                <canvas id="pdf-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main>
         <div class="container">
@@ -523,8 +849,34 @@
                 <section class="hero">
                     <div class="hero-content">
                         <h1>AIbo</h1>
+                        <button class="explore-btn" id="exploreBtn">
+                            Explore <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </section>
+            </section>
+
+            <!-- Comics Page -->
+            <section id="comics" class="page">
+                <button class="back-btn" id="backToHome">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <div class="comics-page">
+                    <div class="comics-header">
+                        <h2>Comics</h2>
+                        <p>Journey through the AIbo universe</p>
+                    </div>
+                    <div class="comic-grid">
+                        <div class="comic-card" id="comic1" data-pdf="comic-issue-1.pdf">
+                            <img src="comic-cover-1.png" alt="AIbo Issue #1 Cover" class="comic-cover" onerror="this.src='https://via.placeholder.com/300x450/15151f/00ffd0?text=Issue+%231'">
+                            <h3 class="comic-title">AIbo</h3>
+                            <span class="comic-issue">Issue #1</span>
+                            <div class="read-indicator">
+                                <i class="fas fa-book-open"></i> Click to read
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- Whitelist Page -->
@@ -574,6 +926,7 @@
                 <div class="content-section">
                     <h2>Payment Successful!</h2>
                     <p>Thank you for your purchase! You'll receive a confirmation email soon.</p>
+                    <div id="order-details"></div>
                     <button class="submit-btn" id="returnHomeBtn" style="margin-top: 1rem;">Return to Home</button>
                 </div>
             </section>
@@ -599,6 +952,9 @@
     <!-- Add Supabase CDN -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
+        // Initialize PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
         // Initialize Supabase
         const SUPABASE_URL = 'https://cpmapqoeyahbsuyxsyfh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
@@ -609,7 +965,135 @@
     
         // Track fetch state to prevent overlapping calls
         let isFetchingProducts = false;
-        let checkoutInstance = null; // Track Stripe checkout instance
+        let checkoutInstance = null;
+
+        // PDF Reader State
+        let pdfDoc = null;
+        let currentPage = 1;
+        let totalPages = 0;
+        let currentScale = 1.5;
+        const MIN_SCALE = 0.5;
+        const MAX_SCALE = 3;
+
+        // Explore button click handler
+        document.getElementById('exploreBtn').addEventListener('click', function() {
+            const overlay = document.getElementById('zoomOverlay');
+            overlay.classList.add('active');
+            
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                navigateTo('comics');
+            }, 1000);
+        });
+
+        // Back button handler
+        document.getElementById('backToHome').addEventListener('click', () => navigateTo('home'));
+
+        // Comic card click handler
+        document.getElementById('comic1').addEventListener('click', function() {
+            const pdfPath = this.dataset.pdf;
+            openComicReader(pdfPath, 'AIbo Issue #1');
+        });
+
+        // PDF Reader Functions
+        async function openComicReader(pdfPath, title) {
+            const modal = document.getElementById('readerModal');
+            const canvas = document.getElementById('pdf-canvas');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            modal.classList.add('active');
+            document.getElementById('readerTitle').textContent = title;
+            loadingSpinner.style.display = 'flex';
+            canvas.style.display = 'none';
+
+            try {
+                pdfDoc = await pdfjsLib.getDocument(pdfPath).promise;
+                totalPages = pdfDoc.numPages;
+                currentPage = 1;
+                updatePageIndicator();
+                await renderPage(currentPage);
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                loadingSpinner.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f72585;"></i><span>Unable to load comic. Please try again later.</span>';
+            }
+        }
+
+        async function renderPage(pageNum) {
+            const canvas = document.getElementById('pdf-canvas');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const ctx = canvas.getContext('2d');
+
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: currentScale });
+
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+
+            await page.render(renderContext).promise;
+            loadingSpinner.style.display = 'none';
+            canvas.style.display = 'block';
+        }
+
+        function updatePageIndicator() {
+            document.getElementById('pageIndicator').textContent = 'Page ' + currentPage + ' of ' + totalPages;
+            document.getElementById('prevPage').disabled = currentPage <= 1;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages;
+        }
+
+        // Reader controls
+        document.getElementById('prevPage').addEventListener('click', async () => {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePageIndicator();
+                await renderPage(currentPage);
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', async () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePageIndicator();
+                await renderPage(currentPage);
+            }
+        });
+
+        document.getElementById('zoomIn').addEventListener('click', async () => {
+            if (currentScale < MAX_SCALE) {
+                currentScale += 0.25;
+                await renderPage(currentPage);
+            }
+        });
+
+        document.getElementById('zoomOut').addEventListener('click', async () => {
+            if (currentScale > MIN_SCALE) {
+                currentScale -= 0.25;
+                await renderPage(currentPage);
+            }
+        });
+
+        document.getElementById('closeReader').addEventListener('click', () => {
+            document.getElementById('readerModal').classList.remove('active');
+            pdfDoc = null;
+        });
+
+        // Keyboard navigation for reader
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('readerModal').classList.contains('active')) return;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                document.getElementById('prevPage').click();
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('nextPage').click();
+            } else if (e.key === 'Escape') {
+                document.getElementById('closeReader').click();
+            }
+        });
     
         // Navigation functionality - make it global
         window.navigateTo = function(pageId) {
@@ -626,7 +1110,6 @@
             }
             window.scrollTo(0, 0);
     
-            // Remove Cassiopeia menu related code
             if (pageId === 'whitelist' || pageId === 'merch' || pageId === 'success') {
                 if (pageId === 'whitelist') {
                     getSubmissionCount();
@@ -646,21 +1129,16 @@
             const cartSection = document.getElementById('cart-section');
             const embeddedCheckout = document.getElementById('embedded-checkout');
             
-            // Hide checkout container and show cart section
             checkoutContainer.style.display = 'none';
             cartSection.style.display = 'block';
-            
-            // Clear embedded checkout content
             embeddedCheckout.innerHTML = '';
             
-            // Destroy Stripe checkout instance if it exists
             if (checkoutInstance) {
                 console.log('Destroying Stripe checkout instance');
                 checkoutInstance.destroy();
                 checkoutInstance = null;
             }
             
-            // Ensure products are visible
             fetchProducts();
         }
     
@@ -697,7 +1175,7 @@
                 
                 const submissionCount = document.getElementById('submissionCount');
                 submissionCount.innerHTML = 
-                    `${count}/${maxAddresses} addresses on whitelist <span class="status-indicator status-online" id="statusIndicator"></span>`;
+                    count + '/' + maxAddresses + ' addresses on whitelist <span class="status-indicator status-online" id="statusIndicator"></span>';
                 document.getElementById('serverStatus').textContent = 'Live count from server';
                 document.getElementById('statusIndicator').className = 'status-indicator status-online';
                 
@@ -705,7 +1183,7 @@
             } catch (error) {
                 console.error('Error getting count:', error);
                 document.getElementById('submissionCount').innerHTML = 
-                    `Error loading count <span class="status-indicator status-offline" id="statusIndicator"></span>`;
+                    'Error loading count <span class="status-indicator status-offline" id="statusIndicator"></span>';
                 document.getElementById('serverStatus').textContent = 'Unable to connect to server';
                 document.getElementById('statusIndicator').className = 'status-indicator status-offline';
                 return 0;
@@ -768,7 +1246,7 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Check Whitelist';
             }
-        }
+        });
     
         // Subscribe to real-time changes
         function subscribeToWhitelistChanges() {
@@ -787,11 +1265,9 @@
         }
     
         function startProductRefresher() {
-            // Only fetch immediately if merch is active
             if (document.getElementById('merch').classList.contains('active')) {
                 fetchProducts();
             }
-            // Clear existing interval to prevent overlap
             let refreshInterval = null;
             if (refreshInterval) {
                 clearInterval(refreshInterval);
@@ -821,12 +1297,12 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
                     },
                     body: JSON.stringify({ endpoint: 'store/products', method: 'GET' }),
                 });
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${await response.text()}`);
+                    throw new Error('HTTP error! Status: ' + response.status + ', Message: ' + await response.text());
                 }
                 const data = await response.json();
                 console.log('Products response:', data);
@@ -840,7 +1316,7 @@
                 renderProducts(products);
             } catch (error) {
                 console.error('Error fetching products:', error);
-                showMessage(`Failed to load merch: ${error.message}`, 'error');
+                showMessage('Failed to load merch: ' + error.message, 'error');
                 document.getElementById('shop').innerHTML = '<p>Error loading products.</p>';
             } finally {
                 isFetchingProducts = false;
@@ -850,32 +1326,32 @@
         // Render products
         function renderProducts(products) {
             const shopContainer = document.getElementById('shop');
-            shopContainer.innerHTML = ''; // Clear container before rendering
+            shopContainer.innerHTML = '';
             if (!products.length) {
                 shopContainer.innerHTML = '<p>No products to display.</p>';
                 return;
             }
             products.forEach(product => {
-                console.log(`Fetching details for product ${product.id}`);
+                console.log('Fetching details for product ' + product.id);
                 fetch('https://cpmapqoeyahbsuyxsyfh.supabase.co/functions/v1/printful-proxy', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
                     },
-                    body: JSON.stringify({ endpoint: `store/products/${product.id}`, method: 'GET' }),
+                    body: JSON.stringify({ endpoint: 'store/products/' + product.id, method: 'GET' }),
                 })
                     .then(res => {
-                        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                        if (!res.ok) throw new Error('HTTP error! Status: ' + res.status);
                         return res.json();
                     })
                     .then(data => {
-                        console.log(`Product ${product.id} response:`, data);
+                        console.log('Product ' + product.id + ' response:', data);
                         const productData = data.result || data;
                         const variants = productData.sync_variants || [];
-                        console.log(`Variants for ${product.id}:`, variants);
+                        console.log('Variants for ' + product.id + ':', variants);
                         if (!variants.length) {
-                            console.warn(`No variants for product ${product.id}`);
+                            console.warn('No variants for product ' + product.id);
                             return;
                         }
                         const div = document.createElement('div');
@@ -883,28 +1359,23 @@
                         div.dataset.productId = product.id;
                         const firstVariant = variants[0];
                         
-                        // Escape product name for HTML attribute
                         const escapedProductName = product.name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
                         
-                        div.innerHTML = `
-                            <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${escapedProductName}">
-                            <h3>${product.name.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h3>
-                            <p>$${firstVariant.retail_price || '25.00'}</p>
-                            <select id="variant-${product.id}">
-                                ${variants.map(v => {
+                        div.innerHTML = '<img src="' + (product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image') + '" alt="' + escapedProductName + '">' +
+                            '<h3>' + product.name.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</h3>' +
+                            '<p>$' + (firstVariant.retail_price || '25.00') + '</p>' +
+                            '<select id="variant-' + product.id + '">' +
+                                variants.map(v => {
                                     const size = v.name.split(' - ').pop() || 'Unknown';
                                     const escapedVariantName = v.name.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                                     const escapedSize = size.replace(/"/g, '&quot;');
-                                    return `<option value="${v.id}" data-size="${escapedSize}" data-price="${v.retail_price || '25.00'}">${escapedVariantName} ($${v.retail_price || '25.00'})</option>`;
-                                }).join('')}
-                            </select>
-                            <button class="add-to-cart-btn" data-product-id="${product.id}" data-product-name="${escapedProductName}" data-select-id="variant-${product.id}">Add to Cart</button>
-                        `;
+                                    return '<option value="' + v.id + '" data-size="' + escapedSize + '" data-price="' + (v.retail_price || '25.00') + '">' + escapedVariantName + ' ($' + (v.retail_price || '25.00') + ')</option>';
+                                }).join('') +
+                            '</select>' +
+                            '<button class="add-to-cart-btn" data-product-id="' + product.id + '" data-product-name="' + escapedProductName + '" data-select-id="variant-' + product.id + '">Add to Cart</button>';
                         
-                        // Add event listener to the button
                         const addButton = div.querySelector('.add-to-cart-btn');
                         addButton.addEventListener('click', function() {
-                            // Decode the HTML entities back to regular text
                             const productName = this.dataset.productName.replace(/&quot;/g, '"').replace(/&#39;/g, "'");
                             window.addToCart(
                                 this.dataset.productId,
@@ -916,15 +1387,13 @@
                         shopContainer.appendChild(div);
                     })
                     .catch(error => {
-                        console.error(`Error fetching product ${product.id}:`, error);
+                        console.error('Error fetching product ' + product.id + ':', error);
                         const div = document.createElement('div');
                         div.className = 'product-card';
-                        div.innerHTML = `
-                            <img src="${product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image'}" alt="${product.name}">
-                            <h3>${product.name}</h3>
-                            <p>Price: N/A (Error loading details)</p>
-                            <button disabled>Error loading variants</button>
-                        `;
+                        div.innerHTML = '<img src="' + (product.thumbnail_url || 'https://via.placeholder.com/300x300?text=No+Image') + '" alt="' + product.name + '">' +
+                            '<h3>' + product.name + '</h3>' +
+                            '<p>Price: N/A (Error loading details)</p>' +
+                            '<button disabled>Error loading variants</button>';
                         shopContainer.appendChild(div);
                     });
             });
@@ -953,14 +1422,13 @@
             const cartItems = document.getElementById('cart-items');
             const checkoutBtn = document.getElementById('checkout-btn');
             cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartItems.innerHTML = cart.map((item, index) => `
-                <li style="display: flex; align-items: center; color: #ffffff; gap: 5px;">
-                    ${item.product_name} (${item.size}) - $${item.price} x ${item.quantity}
-                    <span class="cart-remove-btn" data-index="${index}" style="color: var(--teal); cursor: pointer; font-size: 1rem;">&times;</span>
-                </li>
-            `).join('');
+            cartItems.innerHTML = cart.map((item, index) => 
+                '<li style="display: flex; align-items: center; color: #ffffff; gap: 5px;">' +
+                    item.product_name + ' (' + item.size + ') - $' + item.price + ' x ' + item.quantity +
+                    '<span class="cart-remove-btn" data-index="' + index + '" style="color: var(--teal); cursor: pointer; font-size: 1rem;">&times;</span>' +
+                '</li>'
+            ).join('');
             
-            // Add event listeners to all remove buttons
             document.querySelectorAll('.cart-remove-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     window.removeFromCart(parseInt(this.dataset.index));
@@ -972,8 +1440,8 @@
 
         // Remove from cart - make it global
         window.removeFromCart = function(index) {
-            cart.splice(index, 1); // Remove the item at the specified index
-            updateCart(); // Update the cart UI
+            cart.splice(index, 1);
+            updateCart();
         }
             
         const STRIPE_PUBLISHABLE_KEY = 'pk_live_51S7XRP460JpnV7L5GBrDfqGOmK1YxBz126CI7uG3Tll2AeUiGywaOtKkA4KKmvIgxeWbsqx51B1BTP82zKQVlwQq00QTBZqQFW';
@@ -991,13 +1459,13 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
                     },
                     body: JSON.stringify(cart),
                 });
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+                    throw new Error('HTTP error! Status: ' + response.status + ', Message: ' + errorText);
                 }
                 const data = await response.json();
                 console.log('Checkout response:', data);
@@ -1011,13 +1479,13 @@
                 const checkout = await stripe.initEmbeddedCheckout({
                     clientSecret: data.clientSecret,
                 });
-                checkoutInstance = checkout; // Store checkout instance
+                checkoutInstance = checkout;
                 checkout.mount('#embedded-checkout');
                 document.getElementById('checkout-container').style.display = 'block';
                 document.getElementById('cart-section').style.display = 'none';
             } catch (error) {
                 console.error('Error initiating checkout:', error);
-                showMessage(`Checkout failed: ${error.message}`, 'error');
+                showMessage('Checkout failed: ' + error.message, 'error');
                 document.getElementById('checkout-container').style.display = 'none';
                 document.getElementById('cart-section').style.display = 'block';
             }
@@ -1034,10 +1502,8 @@
                 cart = [];
                 updateCart();
         
-                // Reset merch page UI
                 resetMerchPage();
         
-                // Delay to ensure webhook populates orders table
                 await new Promise(resolve => setTimeout(resolve, 2000));
         
                 try {
@@ -1057,17 +1523,15 @@
                     console.log('Order data:', data);
                     const orderDetails = document.getElementById('order-details');
                     const cartItems = data.cart || [];
-                    orderDetails.innerHTML = `
-                        <h3>Order Details</h3>
-                        <ul style="list-style: none; padding: 0;">
-                            ${cartItems.map(item => {
+                    orderDetails.innerHTML = '<h3>Order Details</h3>' +
+                        '<ul style="list-style: none; padding: 0;">' +
+                            cartItems.map(item => {
                                 const escapedName = (item.product_name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                                return `<li>${escapedName} (${item.size}) - $${item.price} x ${item.quantity}</li>`;
-                            }).join('')}
-                        </ul>
-                        <p><strong>Shipping Address:</strong> ${data.shipping_address.name || 'N/A'}, ${data.shipping_address.line1}, ${data.shipping_address.city}, ${data.shipping_address.state || ''} ${data.shipping_address.postal_code}, ${data.shipping_address.country}</p>
-                        <p><strong>Order Number:</strong> ${data.printful_order_id || 'Pending'}</p>
-                    `;
+                                return '<li>' + escapedName + ' (' + item.size + ') - $' + item.price + ' x ' + item.quantity + '</li>';
+                            }).join('') +
+                        '</ul>' +
+                        '<p><strong>Shipping Address:</strong> ' + (data.shipping_address.name || 'N/A') + ', ' + data.shipping_address.line1 + ', ' + data.shipping_address.city + ', ' + (data.shipping_address.state || '') + ' ' + data.shipping_address.postal_code + ', ' + data.shipping_address.country + '</p>' +
+                        '<p><strong>Order Number:</strong> ' + (data.printful_order_id || 'Pending') + '</p>';
                 } catch (error) {
                     console.error('Error fetching order details:', error);
                     document.getElementById('order-details').innerHTML = '<p>Unable to load order details. Please contact support.</p>';
@@ -1079,7 +1543,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, checking initial URL:', window.location.href);
             
-            // Add event listener for Return to Home button
             const returnHomeBtn = document.getElementById('returnHomeBtn');
             if (returnHomeBtn) {
                 returnHomeBtn.addEventListener('click', function() {
@@ -1088,7 +1551,6 @@
                 });
             }
             
-            // Add event listener for merch link
             const merchLink = document.getElementById('merchLink');
             if (merchLink) {
                 merchLink.addEventListener('click', function(e) {
@@ -1097,19 +1559,17 @@
                 });
             }
             
-            // Parse hash carefully to handle query parameters
             let initialPage = window.location.hash.replace('#', '').split('?')[0] || 'home';
-            if (!['home', 'whitelist', 'merch', 'success'].includes(initialPage)) {
+            if (!['home', 'whitelist', 'merch', 'success', 'comics'].includes(initialPage)) {
                 initialPage = 'home';
             }
             navigateTo(initialPage);
             startCountRefresher();
             subscribeToWhitelistChanges();
             startProductRefresher();
-            handleCheckoutSuccess(); // Check for success redirect on load
+            handleCheckoutSuccess();
             document.getElementById('checkout-btn').addEventListener('click', handleCheckout);
     
-            // Add hashchange listener for dynamic navigation
             window.addEventListener('hashchange', () => {
                 console.log('Hash changed:', window.location.hash);
                 const pageId = window.location.hash.replace('#', '').split('?')[0] || 'home';
