@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://js.stripe.com/v3/"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
     <style>
         /* Doto Font Implementation */
         @font-face {
@@ -381,17 +381,19 @@
             background: var(--dark-bg);
         }
 
-        .pdf-canvas-container {
+        .comic-image-container {
             max-width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        #pdf-canvas {
+        #comic-image {
             max-width: 100%;
+            max-height: calc(100vh - 120px);
             height: auto;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: none;
         }
 
         .loading-spinner {
@@ -800,7 +802,7 @@
 <body>
     <!-- Static Image Background -->
     <div class="image-background">
-        <img src="aibonewbkg.png" alt="AIbo Background">
+        <img src="aibonew.png" alt="AIbo Background">
     </div>
 
     <!-- Zoom Transition Overlay -->
@@ -814,15 +816,9 @@
                 <button class="reader-btn" id="prevPage">
                     <i class="fas fa-chevron-left"></i> Prev
                 </button>
-                <span class="page-indicator" id="pageIndicator">Page 1 of 1</span>
+                <span class="page-indicator" id="pageIndicator">Cover (1/7)</span>
                 <button class="reader-btn" id="nextPage">
                     Next <i class="fas fa-chevron-right"></i>
-                </button>
-                <button class="reader-btn" id="zoomOut">
-                    <i class="fas fa-minus"></i>
-                </button>
-                <button class="reader-btn" id="zoomIn">
-                    <i class="fas fa-plus"></i>
                 </button>
             </div>
             <button class="close-reader" id="closeReader">
@@ -830,12 +826,12 @@
             </button>
         </div>
         <div class="reader-content">
-            <div class="pdf-canvas-container">
+            <div class="comic-image-container">
                 <div class="loading-spinner" id="loadingSpinner">
                     <div class="spinner"></div>
                     <span>Loading comic...</span>
                 </div>
-                <canvas id="pdf-canvas"></canvas>
+                <img id="comic-image" alt="Comic page">
             </div>
         </div>
     </div>
@@ -867,8 +863,8 @@
                         <p>Journey through the AIbo universe</p>
                     </div>
                     <div class="comic-grid">
-                        <div class="comic-card" id="comic1" data-pdf="comic_prologue.pdf">
-                            <img src="comic_cover_0.png" alt="AIbo Prologue Cover" class="comic-cover" onerror="this.src='https://via.placeholder.com/300x450/15151f/00ffd0?text=Issue+%231'">
+                        <div class="comic-card" id="comic1" data-pdf="comic-issue-1.pdf">
+                            <img src="comic-cover-1.png" alt="AIbo Prologue Cover" class="comic-cover" onerror="this.src='https://via.placeholder.com/300x450/15151f/00ffd0?text=Issue+%231'">
                             <h3 class="comic-title">AIbo</h3>
                             <span class="comic-issue">Prologue</span>
                             <div class="read-indicator">
@@ -952,9 +948,6 @@
     <!-- Add Supabase CDN -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-        // Initialize PDF.js worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
         // Initialize Supabase
         const SUPABASE_URL = 'https://cpmapqoeyahbsuyxsyfh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
@@ -967,13 +960,10 @@
         let isFetchingProducts = false;
         let checkoutInstance = null;
 
-        // PDF Reader State
-        let pdfDoc = null;
-        let currentPage = 1;
+        // Comic Reader State
+        let comicPages = [];
+        let currentPage = 0;
         let totalPages = 0;
-        let currentScale = 1.5;
-        const MIN_SCALE = 0.5;
-        const MAX_SCALE = 3;
 
         // Explore button click handler
         document.getElementById('exploreBtn').addEventListener('click', function() {
@@ -991,94 +981,82 @@
 
         // Comic card click handler
         document.getElementById('comic1').addEventListener('click', function() {
-            const pdfPath = this.dataset.pdf;
-            openComicReader(pdfPath, 'AIbo Prologue');
+            // Define comic pages: cover, pages 1-5, back cover
+            const pages = [
+                { src: 'comic-cover-1.png', label: 'Cover' },
+                { src: 'Page_1.png', label: 'Page 1' },
+                { src: 'Page_2.png', label: 'Page 2' },
+                { src: 'Page_3.png', label: 'Page 3' },
+                { src: 'Page_4.png', label: 'Page 4' },
+                { src: 'Page_5.png', label: 'Page 5' },
+                { src: 'comic-back-1.png', label: 'Back Cover' }
+            ];
+            openComicReader(pages, 'AIbo Prologue');
         });
 
-        // PDF Reader Functions
-        async function openComicReader(pdfPath, title) {
+        // Comic Reader Functions
+        function openComicReader(pages, title) {
             const modal = document.getElementById('readerModal');
-            const canvas = document.getElementById('pdf-canvas');
+            const img = document.getElementById('comic-image');
             const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            comicPages = pages;
+            totalPages = pages.length;
+            currentPage = 0;
             
             modal.classList.add('active');
             document.getElementById('readerTitle').textContent = title;
             loadingSpinner.style.display = 'flex';
-            canvas.style.display = 'none';
-
-            try {
-                pdfDoc = await pdfjsLib.getDocument(pdfPath).promise;
-                totalPages = pdfDoc.numPages;
-                currentPage = 1;
-                updatePageIndicator();
-                await renderPage(currentPage);
-            } catch (error) {
-                console.error('Error loading PDF:', error);
-                loadingSpinner.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f72585;"></i><span>Unable to load comic. Please try again later.</span>';
-            }
+            img.style.display = 'none';
+            
+            loadPage(currentPage);
         }
 
-        async function renderPage(pageNum) {
-            const canvas = document.getElementById('pdf-canvas');
+        function loadPage(pageIndex) {
+            const img = document.getElementById('comic-image');
             const loadingSpinner = document.getElementById('loadingSpinner');
-            const ctx = canvas.getContext('2d');
-
-            const page = await pdfDoc.getPage(pageNum);
-            const viewport = page.getViewport({ scale: currentScale });
-
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            const renderContext = {
-                canvasContext: ctx,
-                viewport: viewport
+            
+            loadingSpinner.style.display = 'flex';
+            img.style.display = 'none';
+            
+            img.onload = function() {
+                loadingSpinner.style.display = 'none';
+                img.style.display = 'block';
             };
-
-            await page.render(renderContext).promise;
-            loadingSpinner.style.display = 'none';
-            canvas.style.display = 'block';
+            
+            img.onerror = function() {
+                loadingSpinner.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f72585;"></i><span>Unable to load page. Please try again.</span>';
+            };
+            
+            img.src = comicPages[pageIndex].src;
+            updatePageIndicator();
         }
 
         function updatePageIndicator() {
-            document.getElementById('pageIndicator').textContent = 'Page ' + currentPage + ' of ' + totalPages;
-            document.getElementById('prevPage').disabled = currentPage <= 1;
-            document.getElementById('nextPage').disabled = currentPage >= totalPages;
+            const pageLabel = comicPages[currentPage].label;
+            document.getElementById('pageIndicator').textContent = pageLabel + ' (' + (currentPage + 1) + '/' + totalPages + ')';
+            document.getElementById('prevPage').disabled = currentPage <= 0;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages - 1;
         }
 
         // Reader controls
-        document.getElementById('prevPage').addEventListener('click', async () => {
-            if (currentPage > 1) {
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 0) {
                 currentPage--;
-                updatePageIndicator();
-                await renderPage(currentPage);
+                loadPage(currentPage);
             }
         });
 
-        document.getElementById('nextPage').addEventListener('click', async () => {
-            if (currentPage < totalPages) {
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage < totalPages - 1) {
                 currentPage++;
-                updatePageIndicator();
-                await renderPage(currentPage);
-            }
-        });
-
-        document.getElementById('zoomIn').addEventListener('click', async () => {
-            if (currentScale < MAX_SCALE) {
-                currentScale += 0.25;
-                await renderPage(currentPage);
-            }
-        });
-
-        document.getElementById('zoomOut').addEventListener('click', async () => {
-            if (currentScale > MIN_SCALE) {
-                currentScale -= 0.25;
-                await renderPage(currentPage);
+                loadPage(currentPage);
             }
         });
 
         document.getElementById('closeReader').addEventListener('click', () => {
             document.getElementById('readerModal').classList.remove('active');
-            pdfDoc = null;
+            comicPages = [];
         });
 
         // Keyboard navigation for reader
