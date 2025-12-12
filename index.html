@@ -386,14 +386,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow: auto;
         }
 
         #comic-image {
-            max-width: 100%;
             max-height: calc(100vh - 120px);
             height: auto;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             display: none;
+            transition: transform 0.2s ease;
+            transform-origin: top center;
         }
 
         .loading-spinner {
@@ -820,6 +822,12 @@
                 <button class="reader-btn" id="nextPage">
                     Next <i class="fas fa-chevron-right"></i>
                 </button>
+                <button class="reader-btn" id="zoomOut">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="reader-btn" id="zoomIn">
+                    <i class="fas fa-plus"></i>
+                </button>
             </div>
             <button class="close-reader" id="closeReader">
                 <i class="fas fa-times"></i>
@@ -862,15 +870,8 @@
                         <h2>Comics</h2>
                         <p>Journey through the AIbo universe</p>
                     </div>
-                    <div class="comic-grid">
-                        <div class="comic-card" id="comic1" data-pdf="comic-issue-1.pdf">
-                            <img src="comic-cover-1.png" alt="AIbo Prologue Cover" class="comic-cover" onerror="this.src='https://via.placeholder.com/300x450/15151f/00ffd0?text=Issue+%231'">
-                            <h3 class="comic-title">AIbo</h3>
-                            <span class="comic-issue">Prologue</span>
-                            <div class="read-indicator">
-                                <i class="fas fa-book-open"></i> Click to read
-                            </div>
-                        </div>
+                    <div class="comic-grid" id="comicGrid">
+                        <!-- Comics will be dynamically generated -->
                     </div>
                 </div>
             </section>
@@ -960,10 +961,68 @@
         let isFetchingProducts = false;
         let checkoutInstance = null;
 
+        // ===========================================
+        // COMIC CONFIGURATION - Add new issues here!
+        // ===========================================
+        const comics = [
+            { id: 1, title: "AIbo", subtitle: "Prologue", pages: 5 },
+            // Add more issues like this:
+            // { id: 2, title: "AIbo", subtitle: "Issue #2", pages: 8 },
+            // { id: 3, title: "AIbo", subtitle: "Issue #3", pages: 6 },
+        ];
+        // ===========================================
+
         // Comic Reader State
         let comicPages = [];
         let currentPage = 0;
         let totalPages = 0;
+        let currentZoom = 1;
+        const MIN_ZOOM = 0.5;
+        const MAX_ZOOM = 3;
+        const ZOOM_STEP = 0.25;
+
+        // Generate comic cards from config
+        function renderComicCards() {
+            const grid = document.getElementById('comicGrid');
+            grid.innerHTML = '';
+            
+            comics.forEach(comic => {
+                const card = document.createElement('div');
+                card.className = 'comic-card';
+                card.dataset.comicId = comic.id;
+                card.dataset.pages = comic.pages;
+                card.dataset.title = comic.title + ' ' + comic.subtitle;
+                
+                card.innerHTML = 
+                    '<img src="comics/issue-' + comic.id + '/cover.png" alt="' + comic.title + ' ' + comic.subtitle + ' Cover" class="comic-cover" onerror="this.src=\'https://via.placeholder.com/300x450/15151f/00ffd0?text=Issue+%23' + comic.id + '\'">' +
+                    '<h3 class="comic-title">' + comic.title + '</h3>' +
+                    '<span class="comic-issue">' + comic.subtitle + '</span>' +
+                    '<div class="read-indicator">' +
+                        '<i class="fas fa-book-open"></i> Click to read' +
+                    '</div>';
+                
+                card.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.comicId);
+                    const pageCount = parseInt(this.dataset.pages);
+                    const title = this.dataset.title;
+                    
+                    // Build pages array: cover + pages + back
+                    const pages = [
+                        { src: 'comics/issue-' + id + '/cover.png', label: 'Cover' }
+                    ];
+                    
+                    for (let i = 1; i <= pageCount; i++) {
+                        pages.push({ src: 'comics/issue-' + id + '/page-' + i + '.png', label: 'Page ' + i });
+                    }
+                    
+                    pages.push({ src: 'comics/issue-' + id + '/back.png', label: 'Back Cover' });
+                    
+                    openComicReader(pages, title);
+                });
+                
+                grid.appendChild(card);
+            });
+        }
 
         // Explore button click handler
         document.getElementById('exploreBtn').addEventListener('click', function() {
@@ -979,21 +1038,6 @@
         // Back button handler
         document.getElementById('backToHome').addEventListener('click', () => navigateTo('home'));
 
-        // Comic card click handler
-        document.getElementById('comic1').addEventListener('click', function() {
-            // Define comic pages: cover, pages 1-5, back cover
-            const pages = [
-                { src: 'comic-cover-1.png', label: 'Cover' },
-                { src: 'Page_1.png', label: 'Page 1' },
-                { src: 'Page_2.png', label: 'Page 2' },
-                { src: 'Page_3.png', label: 'Page 3' },
-                { src: 'Page_4.png', label: 'Page 4' },
-                { src: 'Page_5.png', label: 'Page 5' },
-                { src: 'comic-back-1.png', label: 'Back Cover' }
-            ];
-            openComicReader(pages, 'AIbo Prologue');
-        });
-
         // Comic Reader Functions
         function openComicReader(pages, title) {
             const modal = document.getElementById('readerModal');
@@ -1003,6 +1047,7 @@
             comicPages = pages;
             totalPages = pages.length;
             currentPage = 0;
+            currentZoom = 1;
             
             modal.classList.add('active');
             document.getElementById('readerTitle').textContent = title;
@@ -1017,11 +1062,13 @@
             const loadingSpinner = document.getElementById('loadingSpinner');
             
             loadingSpinner.style.display = 'flex';
+            loadingSpinner.innerHTML = '<div class="spinner"></div><span>Loading comic...</span>';
             img.style.display = 'none';
             
             img.onload = function() {
                 loadingSpinner.style.display = 'none';
                 img.style.display = 'block';
+                applyZoom();
             };
             
             img.onerror = function() {
@@ -1039,6 +1086,11 @@
             document.getElementById('nextPage').disabled = currentPage >= totalPages - 1;
         }
 
+        function applyZoom() {
+            const img = document.getElementById('comic-image');
+            img.style.transform = 'scale(' + currentZoom + ')';
+        }
+
         // Reader controls
         document.getElementById('prevPage').addEventListener('click', () => {
             if (currentPage > 0) {
@@ -1054,9 +1106,24 @@
             }
         });
 
+        document.getElementById('zoomIn').addEventListener('click', () => {
+            if (currentZoom < MAX_ZOOM) {
+                currentZoom += ZOOM_STEP;
+                applyZoom();
+            }
+        });
+
+        document.getElementById('zoomOut').addEventListener('click', () => {
+            if (currentZoom > MIN_ZOOM) {
+                currentZoom -= ZOOM_STEP;
+                applyZoom();
+            }
+        });
+
         document.getElementById('closeReader').addEventListener('click', () => {
             document.getElementById('readerModal').classList.remove('active');
             comicPages = [];
+            currentZoom = 1;
         });
 
         // Keyboard navigation for reader
@@ -1070,6 +1137,10 @@
                 document.getElementById('nextPage').click();
             } else if (e.key === 'Escape') {
                 document.getElementById('closeReader').click();
+            } else if (e.key === '+' || e.key === '=') {
+                document.getElementById('zoomIn').click();
+            } else if (e.key === '-') {
+                document.getElementById('zoomOut').click();
             }
         });
     
@@ -1520,6 +1591,9 @@
         // Consolidated DOMContentLoaded listener
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, checking initial URL:', window.location.href);
+            
+            // Render comic cards from config
+            renderComicCards();
             
             const returnHomeBtn = document.getElementById('returnHomeBtn');
             if (returnHomeBtn) {
