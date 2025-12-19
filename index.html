@@ -869,7 +869,7 @@
 <body>
     <!-- Static Image Background -->
     <div class="image-background">
-        <img src="aibonewbkg.png" alt="AIbo Background">
+        <img src="aibonew.png" alt="AIbo Background">
     </div>
 
     <!-- Zoom Transition Overlay -->
@@ -1223,6 +1223,10 @@
         // Show message to user
         function showMessage(message, type) {
             const messageDiv = document.getElementById('formMessage');
+            if (!messageDiv) {
+                console.log('Message:', message, '(' + type + ')');
+                return;
+            }
             messageDiv.textContent = message;
             messageDiv.style.display = 'block';
             if (type === 'success') {
