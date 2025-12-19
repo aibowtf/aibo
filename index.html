@@ -869,7 +869,7 @@
 <body>
     <!-- Static Image Background -->
     <div class="image-background">
-        <img src="aibonewbkg.png" alt="AIbo Background">
+        <img src="aibonew.png" alt="AIbo Background">
     </div>
 
     <!-- Zoom Transition Overlay -->
@@ -1012,7 +1012,7 @@
         const SUPABASE_URL = 'https://cpmapqoeyahbsuyxsyfh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbWFwcW9leWFoYnN1eXhzeWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODA1OTYsImV4cCI6MjA3MjE1NjU5Nn0.kz2NnxAtshJL2giZu0A8DPwzQuXpX1MKGbFbAUv0yB0';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         const maxAddresses = 500;
     
@@ -1249,7 +1249,7 @@
                 document.getElementById('serverStatus').textContent = 'Connecting to server...';
                 document.getElementById('statusIndicator').className = 'status-indicator status-offline';
                 
-                const { count, error } = await supabase
+                const { count, error } = await supabaseClient
                     .from('whitelist')
                     .select('*', { count: 'exact', head: true });
                 
@@ -1276,7 +1276,7 @@
         async function checkWhitelistStatus(address) {
             try {
                 const cleanAddress = address.trim().toLowerCase();
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('whitelist')
                     .select('wallet_address')
                     .eq('wallet_address', cleanAddress);
@@ -1332,7 +1332,7 @@
     
         // Subscribe to real-time changes
         function subscribeToWhitelistChanges() {
-            supabase
+            supabaseClient
                 .channel('whitelist-changes')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'whitelist' }, () => {
                     getSubmissionCount();
@@ -1590,7 +1590,7 @@
         
                 try {
                     console.log('Fetching order details for sessionId:', sessionId);
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('orders')
                         .select('cart, shipping_address, printful_order_id')
                         .eq('stripe_session_id', sessionId)
