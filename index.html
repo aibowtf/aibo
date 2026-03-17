@@ -387,6 +387,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
         }
 
         #comic-image {
@@ -396,7 +397,15 @@
             height: auto;
             object-fit: contain;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            display: none;
+            transition: opacity 0.15s ease;
+        }
+
+        #comic-image.loading {
+            opacity: 0;
+        }
+
+        #comic-image.loaded {
+            opacity: 1;
         }
 
         .loading-spinner {
@@ -405,6 +414,14 @@
             align-items: center;
             gap: 1rem;
             color: var(--text-muted);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .loading-spinner.hidden {
+            display: none;
         }
 
         .spinner {
@@ -960,6 +977,9 @@
 
             <!-- Merch Page -->
             <section id="merch" class="page">
+                <button class="back-btn" id="backToHomeFromMerch">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
                 <div class="content-section">
                     <h2>Merch</h2>
                     <div id="shop" class="shop-container">
@@ -993,13 +1013,13 @@
     <footer>
         <div class="container">
             <div class="social-links">
-                <a href="https://aibouniverse.com"><i class="fas fa-house"></i></a>
-                <a href="https://x.com/aibowtf"><i class="fab fa-twitter"></i></a>
-                <a href="https://discord.gg/N27ugwBgR8"><i class="fab fa-discord"></i></a>
-                <a href="https://github.com/aibowtf"><i class="fab fa-github"></i></a>
-                <a href="https://drip.trade/collections/albo"><i class="fas fa-droplet"></i></a>
-                <a href="https://www.liquidfi.app/collection/hyperliquid/0xe10C70aa97b96E0e1221cF9a78F73C8c900B24D3"><i class="fas fa-flask"></i></a>
-                <a href="https://img_aibowtf.arweave.net"><i class="fas fa-hard-drive"></i></a>
+                <a href="https://aibouniverse.com" target="_blank" rel="noopener noreferrer"><i class="fas fa-house"></i></a>
+                <a href="https://x.com/aibowtf" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"></i></a>
+                <a href="https://discord.gg/N27ugwBgR8" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i></a>
+                <a href="https://github.com/aibowtf" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+                <a href="https://drip.trade/collections/albo" target="_blank" rel="noopener noreferrer"><i class="fas fa-droplet"></i></a>
+                <a href="https://www.liquidfi.app/collection/hyperliquid/0xe10C70aa97b96E0e1221cF9a78F73C8c900B24D3" target="_blank" rel="noopener noreferrer"><i class="fas fa-flask"></i></a>
+                <a href="https://img_aibowtf.arweave.net" target="_blank" rel="noopener noreferrer"><i class="fas fa-hard-drive"></i></a>
                 <a href="#merch" id="merchLink"><i class="fas fa-shirt"></i></a>
             </div>
         </div>
@@ -1031,10 +1051,47 @@
         ];
         // ===========================================
 
-        // Comic Reader State
+        // =============================================
+        // OPTIMIZED COMIC READER - Image preloading
+        // =============================================
+        const imageCache = new Map();
         let comicPages = [];
         let currentPage = 0;
         let totalPages = 0;
+
+        /**
+         * Preload a single image and cache the promise.
+         * Returns a promise that resolves with the loaded Image element.
+         */
+        function preloadImage(src) {
+            if (imageCache.has(src)) return imageCache.get(src);
+            const promise = new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+            imageCache.set(src, promise);
+            return promise;
+        }
+
+        /**
+         * Preload adjacent pages (prev, next, next+1) for snappy navigation.
+         */
+        function preloadAdjacentPages(index) {
+            [index - 1, index + 1, index + 2].forEach(i => {
+                if (i >= 0 && i < comicPages.length) {
+                    preloadImage(comicPages[i].src);
+                }
+            });
+        }
+
+        /**
+         * Kick off background preload for every page in the issue.
+         */
+        function preloadAllPages(pages) {
+            pages.forEach(page => preloadImage(page.src));
+        }
 
         // Generate comic cards from config
         function renderComicCards() {
@@ -1061,15 +1118,12 @@
                     const pageCount = parseInt(this.dataset.pages);
                     const title = this.dataset.title;
                     
-                    // Build pages array: cover + pages + back
                     const pages = [
                         { src: 'comics/issue-' + id + '/cover.png', label: 'Cover' }
                     ];
-                    
                     for (let i = 1; i <= pageCount; i++) {
                         pages.push({ src: 'comics/issue-' + id + '/page-' + i + '.png', label: 'Page ' + i });
                     }
-                    
                     pages.push({ src: 'comics/issue-' + id + '/back.png', label: 'Back Cover' });
                     
                     openComicReader(pages, title);
@@ -1090,14 +1144,14 @@
             }, 1000);
         });
 
-        // Back button handler
+        // Back button handlers
         document.getElementById('backToHome').addEventListener('click', () => navigateTo('home'));
+        document.getElementById('backToHomeFromMerch').addEventListener('click', () => navigateTo('home'));
 
-        // Comic Reader Functions
+        // ---- Comic Reader Functions (optimized) ----
+
         function openComicReader(pages, title) {
             const modal = document.getElementById('readerModal');
-            const img = document.getElementById('comic-image');
-            const loadingSpinner = document.getElementById('loadingSpinner');
             
             comicPages = pages;
             totalPages = pages.length;
@@ -1105,31 +1159,61 @@
             
             modal.classList.add('active');
             document.getElementById('readerTitle').textContent = title;
-            loadingSpinner.style.display = 'flex';
-            img.style.display = 'none';
+            
+            // Preload ALL pages immediately in background
+            preloadAllPages(pages);
             
             loadPage(currentPage);
         }
 
         function loadPage(pageIndex) {
             const img = document.getElementById('comic-image');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            
-            loadingSpinner.style.display = 'flex';
-            loadingSpinner.innerHTML = '<div class="spinner"></div><span>Loading comic...</span>';
-            img.style.display = 'none';
-            
+            const spinner = document.getElementById('loadingSpinner');
+            const src = comicPages[pageIndex].src;
+
+            // Try the cache first
+            const cached = imageCache.get(src);
+            if (cached) {
+                cached.then(cachedImg => {
+                    // Instant swap — image already in memory
+                    img.classList.add('loading');
+                    spinner.classList.add('hidden');
+                    img.src = cachedImg.src;
+                    requestAnimationFrame(() => {
+                        img.classList.remove('loading');
+                        img.classList.add('loaded');
+                    });
+                }).catch(() => {
+                    // Cache entry failed, do a fresh load
+                    directLoadPage(src, img, spinner);
+                });
+            } else {
+                directLoadPage(src, img, spinner);
+            }
+
+            updatePageIndicator();
+            preloadAdjacentPages(pageIndex);
+        }
+
+        function directLoadPage(src, img, spinner) {
+            img.classList.add('loading');
+            img.classList.remove('loaded');
+            spinner.classList.remove('hidden');
+            spinner.innerHTML = '<div class="spinner"></div><span>Loading comic...</span>';
+
             img.onload = function() {
-                loadingSpinner.style.display = 'none';
-                img.style.display = 'block';
+                spinner.classList.add('hidden');
+                img.classList.remove('loading');
+                img.classList.add('loaded');
             };
             
             img.onerror = function() {
-                loadingSpinner.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f72585;"></i><span>Unable to load page. Please try again.</span>';
+                spinner.classList.remove('hidden');
+                spinner.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f72585;"></i><span>Unable to load page. Please try again.</span>';
+                img.classList.add('loading');
             };
             
-            img.src = comicPages[pageIndex].src;
-            updatePageIndicator();
+            img.src = src;
         }
 
         function updatePageIndicator() {
